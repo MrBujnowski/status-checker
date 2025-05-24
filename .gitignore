@@ -1,0 +1,41 @@
+# Flutter/Dart/Pub related
+.dart_tool/
+.packages
+.pub-cache/
+.pub/
+build/
+ios/Flutter/Flutter.framework
+ios/Flutter/Flutter.podspec
+ios/.symlinks
+ios/Pods
+ios/Runner.xcworkspace
+macos/Flutter/ephemeral
+*.flutter-plugins
+*.flutter-plugins-dependencies
+*.iml
+*.ipr
+*.iws
+.idea/
+android/.gradle
+android/captures/
+android/app/debug
+android/app/profile
+android/app/release
+
+# Web-specific
+web/.dart_tool/
+web/build/
+
+# VS Code
+.vscode/
+
+# IntelliJ
+*.iml
+.idea/
+
+# Environment
+.env
+.env.*
+
+# Firebase / Supabase config (if copied locally)
+supabase/.env
