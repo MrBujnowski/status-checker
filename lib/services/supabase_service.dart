@@ -1,21 +1,38 @@
 // Communicates with Supabase for database and authentication operations.
 
-const supabaseUrl = String.fromEnvironment('SUPABASE_URL');
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class SupabaseService {
-  Future<void> addUrl(String url) async {
-    // TODO: Store new URL in Supabase
-  }
+  final SupabaseClient supabase = Supabase.instance.client;
 
-  Future<void> removeUrl(String urlId) async {
-    // TODO: Remove URL from Supabase
-  }
+  // Load public pages (shared demo content)
+  Future<List<String>> loadPublicPages() async {
+  final response = await supabase
+      .from('pages')
+      .select('url')
+      .eq('is_public', true);
 
-  Future<void> incrementCheckCount() async {
-    // TODO: Record that a check was performed (without storing the result)
-  }
+  if (response == null) return [];
+  
+  final data = response as List<dynamic>;
+  return data.map((e) => e['url'] as String).toList();
+}
 
-  Future<void> saveDiscordWebhook(String url) async {
-    // TODO: Save Discord webhook URL to user settings
-  }
+
+  // Load user's own tracked pages
+  Future<List<String>> loadUserPages() async {
+  final user = supabase.auth.currentUser;
+  if (user == null) return [];
+
+  final response = await supabase
+      .from('pages')
+      .select('url')
+      .eq('user_id', user.id);
+
+  if (response == null) return [];
+
+  final data = response as List<dynamic>;
+  return data.map((e) => e['url'] as String).toList();
+}
+
 }
