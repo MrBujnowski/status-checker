@@ -1,13 +1,21 @@
+// lib/auth/magic_link_service.dart
 // Handles sending and verifying magic links via Supabase Auth.
 
-const supabaseUrl = String.fromEnvironment('SUPABASE_URL');
+import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:status_checker/constants.dart';
 
 class MagicLinkService {
-  Future<void> sendMagicLink(String email) async {
-    // TODO: Send magic link email using Supabase
-  }
+  final SupabaseClient supabase = Supabase.instance.client;
 
-  Future<void> handleMagicLink(String uri) async {
-    // TODO: Handle redirect and login from magic link
+  Future<String?> sendMagicLink(String email) async {
+    try {
+      await supabase.auth.signInWithOtp(
+        email: email,
+        emailRedirectTo: kEmailRedirectUrl,
+      );
+      return null; // success
+    } catch (e) {
+      return 'Chyba přihlášení: ${e.toString()}';
+    }
   }
 }

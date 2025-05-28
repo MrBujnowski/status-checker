@@ -1,9 +1,11 @@
-// Main dashboard page showing tracked URLs and their status.
-
+// lib/home_page.dart
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import 'models/url_entry.dart';
+import 'models/user_settings.dart';
 import 'services/supabase_service.dart';
+import 'widgets/home_content.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -16,61 +18,78 @@ class _HomePageState extends State<HomePage> {
   final SupabaseClient supabase = Supabase.instance.client;
   final SupabaseService supabaseService = SupabaseService();
 
-  final TextEditingController _urlController = TextEditingController();
-
-  List<String> publicPages = [];
-  List<String> userPages = [];
-
+  List<UrlEntry> publicPages = [];
+  List<UrlEntry> userPages = [];
+  UserSettings? currentUserSettings;
   bool isLoading = true;
   bool isLoggedIn = false;
 
   @override
   void initState() {
     super.initState();
-    _loadPages();
+    _loadAllData();
   }
 
-  Future<void> _loadPages() async {
+  Future<void> _loadAllData() async {
     final user = supabase.auth.currentUser;
     setState(() {
       isLoggedIn = user != null;
     });
 
     try {
-      final publicUrls = await supabaseService.loadPublicPages();
+      final publicEntries = await supabaseService.loadPublicPages();
 
-      List<String> userUrls = [];
+      List<UrlEntry> userEntries = [];
+      UserSettings? settings;
       if (user != null) {
-        final rawUserUrls = await supabaseService.loadUserPages();
-        userUrls = rawUserUrls.cast<String>();
+        userEntries = await supabaseService.loadUserPages();
+        settings = await supabaseService.loadUserSettings();
       }
 
       setState(() {
-        publicPages = publicUrls.cast<String>();
-        userPages = userUrls;
+        publicPages = publicEntries;
+        userPages = userEntries;
+        currentUserSettings = settings;
         isLoading = false;
       });
     } catch (e) {
+      print('Error loading data: $e');
       setState(() {
         isLoading = false;
       });
     }
   }
 
-  Future<void> _addUserUrl(String url) async {
+  Future<void> _addUserUrl(String url, String? urlName) async {
     if (url.trim().isEmpty) return;
-    await supabaseService.addUserPage(url.trim());
-    _urlController.clear();
-    _loadPages();
+    // Corrected call: only pass url and urlName (named parameter)
+    await supabaseService.addUserPage(url.trim(), urlName: urlName?.trim());
+    await _loadAllData();
   }
 
-  Future<void> _deleteUserUrl(String url) async {
-    await supabaseService.deleteUserPage(url);
-    _loadPages();
+  Future<void> _deleteUserUrl(String pageId) async {
+    await supabaseService.deleteUserPage(pageId);
+    await _loadAllData();
+  }
+
+  // New method to handle editing a URL
+  Future<void> _editUserUrl(String pageId, String newUrl, String? newUrlName) async {
+    if (newUrl.trim().isEmpty) return;
+    await supabaseService.updateUserPage(pageId, newUrl.trim(), newUrlName: newUrlName?.trim());
+    await _loadAllData();
+  }
+
+  Future<void> _updateUserSettings({String? discordWebhookUrl, bool? isAdmin}) async {
+    await supabaseService.upsertUserSettings(
+      discordWebhookUrl: discordWebhookUrl,
+      isAdmin: isAdmin,
+    );
+    await _loadAllData();
   }
 
   Future<void> _signOut() async {
     await supabase.auth.signOut();
+    await _loadAllData();
   }
 
   @override
@@ -93,42 +112,15 @@ class _HomePageState extends State<HomePage> {
             ),
         ],
       ),
-      body: ListView(
-        padding: const EdgeInsets.all(16),
-        children: [
-          if (isLoggedIn) ...[
-            const Text(
-              "Your tracked pages",
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 8),
-            ...userPages.map(
-              (url) => ListTile(
-                title: Text(url),
-                trailing: IconButton(
-                  icon: const Icon(Icons.delete),
-                  onPressed: () => _deleteUserUrl(url),
-                ),
-              ),
-            ),
-            const SizedBox(height: 16),
-            TextField(
-              controller: _urlController,
-              decoration: const InputDecoration(
-                labelText: 'Add new URL',
-                border: OutlineInputBorder(),
-              ),
-              onSubmitted: _addUserUrl,
-            ),
-            const Divider(height: 32),
-          ],
-          Text(
-            isLoggedIn ? "Example projects" : "Preview (not logged in)",
-            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 8),
-          ...publicPages.map((url) => ListTile(title: Text(url))),
-        ],
+      body: HomeContent(
+        isLoggedIn: isLoggedIn,
+        publicPages: publicPages,
+        userPages: userPages,
+        onAddUrl: _addUserUrl,
+        onDeleteUrl: _deleteUserUrl,
+        onEditUrl: _editUserUrl, // Pass the new edit function
+        currentUserSettings: currentUserSettings,
+        onUpdateUserSettings: _updateUserSettings,
       ),
     );
   }
