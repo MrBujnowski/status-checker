@@ -1,12 +1,19 @@
 #!/usr/bin/env bash
 set -e
 
-# (Optional) Install Flutter SDK if not present – většinou NENÍ třeba!
+# Install Flutter SDK if not present (NEBO ji vždy přepiš, když složka existuje)
 if ! command -v flutter &> /dev/null; then
   echo "🔄 Installing Flutter SDK (stable)…"
+  # Smaž starou složku, pokud existuje
+  rm -rf flutter
   git clone --depth 1 --branch stable https://github.com/flutter/flutter.git
   export PATH="$PATH:$(pwd)/flutter/bin"
+else
+  echo "✅ Flutter already installed"
 fi
+
+# Pokud běžíš build na Netlify, přidej flutter do PATH vždy (i když už je v systému)
+export PATH="$PATH:$(pwd)/flutter/bin"
 
 # Precache web artifacts
 flutter precache --web
