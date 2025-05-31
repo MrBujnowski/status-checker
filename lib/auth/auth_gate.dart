@@ -26,8 +26,7 @@ class _AuthGateState extends State<AuthGate> {
   Future<void> _handleInitialSession() async {
     try {
       await Supabase.instance.client.auth.getSessionFromUrl(Uri.base);
-    } catch (e) {
-    }
+    } catch (e) {}
 
     setState(() {
       _isLoading = false;
