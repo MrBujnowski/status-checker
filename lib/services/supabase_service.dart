@@ -1,7 +1,9 @@
 // lib/services/supabase_service.dart
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:intl/intl.dart';
 import '../models/url_entry.dart';
 import '../models/user_settings.dart';
+import '../models/page_status.dart';
 
 class SupabaseService {
   final SupabaseClient _supabase = Supabase.instance.client;
@@ -148,6 +150,86 @@ class SupabaseService {
       print('User settings saved successfully!');
     } catch (e) {
       print('Error upserting user settings: $e');
+    }
+  }
+
+  /// Vrátí statusy za posledních 30 dní (UTC nebo Prague)
+  Future<List<PageStatus>> loadPageDailyStatuses(String pageId, {String timezone = 'UTC'}) async {
+    try {
+      final List<dynamic> result = await _supabase
+          .from('page_daily_status')
+          .select('status, day, timezone')
+          .eq('page_id', pageId)
+          .eq('timezone', timezone)
+          .order('day', ascending: false)
+          .limit(30);
+
+      return result.map((json) => PageStatus.fromJson(json as Map<String, dynamic>)).toList();
+    } catch (e) {
+      print('Error loading daily statuses: $e');
+      return [];
+    }
+  }
+
+  /// Vrátí poslední status (dnešní den) pro konkrétní stránku a zónu
+  Future<PageStatus?> loadPageLatestStatus(String pageId, {String timezone = 'UTC'}) async {
+    try {
+      // Zjisti začátek a konec dne v požadovaném časovém pásmu
+      DateTime now = DateTime.now().toUtc();
+      DateTime startOfDay;
+      DateTime endOfDay;
+
+      if (timezone == 'Europe/Prague') {
+        // Najdi dnesní půlnoc v Praze v UTC (i při letním/zimním čase)
+        final localNow = DateTime.now();
+        startOfDay = DateTime(localNow.year, localNow.month, localNow.day).toUtc().subtract(localNow.timeZoneOffset);
+        endOfDay = startOfDay.add(const Duration(hours: 24));
+      } else {
+        // UTC midnight to midnight
+        startOfDay = DateTime.utc(now.year, now.month, now.day);
+        endOfDay = startOfDay.add(const Duration(hours: 24));
+      }
+
+      // Filtrování logů podle období
+      final String startIso = DateFormat("yyyy-MM-ddTHH:mm:ss'Z'").format(startOfDay);
+      final String endIso = DateFormat("yyyy-MM-ddTHH:mm:ss'Z'").format(endOfDay);
+
+      final List<dynamic> result = await _supabase
+          .from('pages_logs')
+          .select('checked_at, error')
+          .eq('page_id', pageId)
+          .gte('checked_at', startIso)
+          .lt('checked_at', endIso);
+
+      int errorCount = 0;
+      if (result.isNotEmpty) {
+        for (var log in result) {
+          if (log['error'] != null && (log['error'] as String).isNotEmpty) {
+            errorCount++;
+          }
+        }
+      }
+
+      String status = "grey";
+      if (result.isNotEmpty) {
+        if (errorCount >= 12) {
+          status = "red";
+        } else if (errorCount > 0) {
+          status = "orange";
+        } else {
+          status = "green";
+        }
+      }
+
+      final String dayStr = DateFormat("yyyy-MM-dd").format(startOfDay.toLocal());
+      return PageStatus(
+        status: status,
+        day: dayStr,
+        timezone: timezone,
+      );
+    } catch (e) {
+      print('Error loading latest status from logs: $e');
+      return null;
     }
   }
 }
