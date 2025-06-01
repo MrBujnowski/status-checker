@@ -15,7 +15,7 @@ class MagicLinkService {
       );
       return null; // success
     } catch (e) {
-      return 'Chyba přihlášení: ${e.toString()}';
+      return 'Login error: ${e.toString()}';
     }
   }
 }

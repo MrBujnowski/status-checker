@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import '../models/url_entry.dart';
 import '../models/user_settings.dart';
 import '../services/discord_service.dart';
+import 'page_status_row.dart';
 
 class HomeContent extends StatefulWidget {
   final bool isLoggedIn;
@@ -12,6 +14,7 @@ class HomeContent extends StatefulWidget {
   final Future<void> Function(String pageId, String newUrl, String? newUrlName) onEditUrl;
   final UserSettings? currentUserSettings;
   final Future<void> Function({String? discordWebhookUrl, bool? isAdmin}) onUpdateUserSettings;
+  final Future<String?> Function() onLoadDiscordWebhookUrl;
 
   const HomeContent({
     super.key,
@@ -23,6 +26,7 @@ class HomeContent extends StatefulWidget {
     required this.onEditUrl,
     this.currentUserSettings,
     required this.onUpdateUserSettings,
+    required this.onLoadDiscordWebhookUrl,
   });
 
   @override
@@ -30,86 +34,47 @@ class HomeContent extends StatefulWidget {
 }
 
 class _HomeContentState extends State<HomeContent> {
-  final TextEditingController _urlController = TextEditingController();
-  final TextEditingController _urlNameController = TextEditingController();
-  final TextEditingController _webhookController = TextEditingController();
-
   final DiscordService _discordService = DiscordService();
   String? _pendingWebhookUrl;
 
-  @override
-  void initState() {
-    super.initState();
-    if (widget.currentUserSettings != null && widget.currentUserSettings!.discordWebhookUrl != null) {
-      _webhookController.text = widget.currentUserSettings!.discordWebhookUrl!;
-    }
-  }
-
-  @override
-  void dispose() {
-    _urlController.dispose();
-    _urlNameController.dispose();
-    _webhookController.dispose();
-    super.dispose();
-  }
-
-  void _submitUrl() {
-    final url = _urlController.text.trim();
-    final urlName = _urlNameController.text.trim();
-    if (url.isNotEmpty) {
-      widget.onAddUrl(url, urlName.isEmpty ? null : urlName);
-      _urlController.clear();
-      _urlNameController.clear();
-    }
-  }
-
-  Future<void> _startDiscordWebhookVerification() async {
-    final webhookUrl = _webhookController.text.trim();
-    if (webhookUrl.isEmpty) return;
-
-    final ok = await _discordService.sendVerificationCode(webhookUrl);
-    if (ok) {
-      _pendingWebhookUrl = webhookUrl;
-      _showVerificationDialog();
-    } else {
-      _showError('Sending code to Discord failed! Check the webhook URL.');
-    }
-  }
-
-  void _showVerificationDialog() {
-    final codeController = TextEditingController();
+  void _showAddPageDialog() {
+    final urlController = TextEditingController();
+    final nameController = TextEditingController();
     showDialog(
       context: context,
-      barrierDismissible: false,
-      builder: (_) => AlertDialog(
-        title: const Text('Verify your Discord webhook'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Text('We sent a 4-digit code to your Discord webhook.\nCopy it from Discord and enter it:'),
-            const SizedBox(height: 12),
-            TextField(
-              controller: codeController,
-              keyboardType: TextInputType.number,
-              maxLength: 4,
-              decoration: const InputDecoration(labelText: 'Verification code'),
-            ),
-          ],
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('Add Page'),
+        content: SizedBox(
+          width: 420,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: nameController,
+                decoration: const InputDecoration(labelText: 'Page Name (optional)'),
+              ),
+              const SizedBox(height: 8),
+              TextField(
+                controller: urlController,
+                decoration: const InputDecoration(labelText: 'Page URL'),
+              ),
+            ],
+          ),
         ),
         actions: [
           TextButton(
             child: const Text('Cancel'),
-            onPressed: () => Navigator.of(context).pop(),
+            onPressed: () => Navigator.of(dialogContext).pop(),
           ),
           ElevatedButton(
-            child: const Text('Verify'),
-            onPressed: () async {
-              if (_discordService.verifyCode(codeController.text.trim())) {
-                Navigator.of(context).pop();
-                await widget.onUpdateUserSettings(discordWebhookUrl: _pendingWebhookUrl);
-                _showInfo('Webhook verified and saved!');
-              } else {
-                _showError('Invalid code. Try again.');
+            child: const Text('Add'),
+            onPressed: () {
+              if (urlController.text.trim().isNotEmpty) {
+                widget.onAddUrl(
+                  urlController.text.trim(),
+                  nameController.text.trim().isEmpty ? null : nameController.text.trim(),
+                );
+                Navigator.of(dialogContext).pop();
               }
             },
           ),
@@ -118,16 +83,152 @@ class _HomeContentState extends State<HomeContent> {
     );
   }
 
-  void _showError(String msg) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(msg), backgroundColor: Colors.red),
+  void _showDiscordWebhookDialog() async {
+    String? currentWebhook = await widget.onLoadDiscordWebhookUrl();
+    if (!mounted) return;
+    currentWebhook ??= "";
+    final webhookController = TextEditingController(text: currentWebhook);
+
+    showDialog(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('Discord Webhook URL'),
+        content: SizedBox(
+          width: 420,
+          child: TextField(
+            controller: webhookController,
+            decoration: const InputDecoration(
+              labelText: 'Webhook URL',
+              hintText: 'Enter your Discord webhook URL',
+            ),
+            keyboardType: TextInputType.url,
+          ),
+        ),
+        actions: [
+          TextButton(
+            child: const Text('Cancel'),
+            onPressed: () => Navigator.of(dialogContext).pop(),
+          ),
+          ElevatedButton(
+            child: const Text('Verify & Save'),
+            onPressed: () async {
+              final url = webhookController.text.trim();
+              if (url.isEmpty) {
+                ScaffoldMessenger.of(dialogContext).showSnackBar(
+                  const SnackBar(content: Text('Please enter the webhook URL')),
+                );
+                return;
+              }
+              if (url == currentWebhook && url.isNotEmpty) {
+                Navigator.of(dialogContext).pop();
+                WidgetsBinding.instance.addPostFrameCallback((_) {
+                  if (!mounted) return;
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Webhook is already saved and verified.')),
+                  );
+                });
+                return;
+              }
+              Navigator.of(dialogContext).pop();
+              final ok = await _discordService.sendVerificationCode(url);
+              if (!mounted) return;
+              if (ok) {
+                _pendingWebhookUrl = url;
+                _showVerificationDialog();
+              } else {
+                WidgetsBinding.instance.addPostFrameCallback((_) {
+                  if (!mounted) return;
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Failed to send verification code. Please check the URL.')),
+                  );
+                });
+              }
+            },
+          ),
+        ],
+      ),
     );
   }
 
-  void _showInfo(String msg) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(msg)),
+  void _showVerificationDialog() {
+    final codeController = TextEditingController();
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('Verify your Discord webhook'),
+        content: SizedBox(
+          width: 360,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Text(
+                'We sent a 4-digit code to your Discord webhook. Copy it from Discord and enter it here:',
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 14),
+              TextField(
+                controller: codeController,
+                keyboardType: TextInputType.number,
+                maxLength: 4,
+                decoration: const InputDecoration(labelText: 'Verification code'),
+              ),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            child: const Text('Cancel'),
+            onPressed: () => Navigator.of(dialogContext).pop(),
+          ),
+          ElevatedButton(
+            child: const Text('Verify & Save'),
+            onPressed: () async {
+              if (_discordService.verifyCode(codeController.text.trim())) {
+                Navigator.of(dialogContext).pop();
+                await widget.onUpdateUserSettings(discordWebhookUrl: _pendingWebhookUrl);
+                if (!mounted) return;
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Webhook verified and saved!')),
+                );
+              } else {
+                if (!mounted) return;
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Invalid code. Please try again.')),
+                );
+              }
+            },
+          ),
+        ],
+      ),
     );
+  }
+
+  Future<void> _showDeleteConfirmDialog(String pageId) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text("Delete page?"),
+        content: const SizedBox(
+          width: 420,
+          child: Text("Are you sure you want to delete this page? All logs and records for this page will also be deleted."),
+        ),
+        actions: [
+          TextButton(
+            child: const Text("Cancel"),
+            onPressed: () => Navigator.of(dialogContext).pop(false),
+          ),
+          ElevatedButton(
+            child: const Text("Delete"),
+            onPressed: () => Navigator.of(dialogContext).pop(true),
+          ),
+        ],
+      ),
+    );
+    if (!mounted) return;
+    if (confirmed == true) {
+      widget.onDeleteUrl(pageId);
+    }
   }
 
   Future<void> _showEditDialog(UrlEntry entry) async {
@@ -137,28 +238,31 @@ class _HomeContentState extends State<HomeContent> {
     return showDialog<void>(
       context: context,
       barrierDismissible: false,
-      builder: (BuildContext context) {
+      builder: (dialogContext) {
         return AlertDialog(
-          title: const Text('Edit URL'),
-          content: SingleChildScrollView(
-            child: ListBody(
-              children: <Widget>[
-                TextField(
-                  controller: editUrlNameController,
-                  decoration: const InputDecoration(labelText: 'Page Name (Optional)'),
-                ),
-                TextField(
-                  controller: editUrlController,
-                  decoration: const InputDecoration(labelText: 'URL'),
-                ),
-              ],
+          title: const Text('Edit page'),
+          content: SizedBox(
+            width: 420,
+            child: SingleChildScrollView(
+              child: ListBody(
+                children: <Widget>[
+                  TextField(
+                    controller: editUrlNameController,
+                    decoration: const InputDecoration(labelText: 'Page Name (optional)'),
+                  ),
+                  TextField(
+                    controller: editUrlController,
+                    decoration: const InputDecoration(labelText: 'Page URL'),
+                  ),
+                ],
+              ),
             ),
           ),
           actions: <Widget>[
             TextButton(
               child: const Text('Cancel'),
               onPressed: () {
-                Navigator.of(context).pop();
+                Navigator.of(dialogContext).pop();
               },
             ),
             ElevatedButton(
@@ -169,7 +273,7 @@ class _HomeContentState extends State<HomeContent> {
                   editUrlController.text.trim(),
                   editUrlNameController.text.trim().isEmpty ? null : editUrlNameController.text.trim(),
                 );
-                Navigator.of(context).pop();
+                Navigator.of(dialogContext).pop();
               },
             ),
           ],
@@ -184,87 +288,73 @@ class _HomeContentState extends State<HomeContent> {
       padding: const EdgeInsets.all(16),
       children: [
         if (widget.isLoggedIn) ...[
+          Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              IconButton(
+                icon: const Icon(Icons.add),
+                tooltip: 'Add Page',
+                onPressed: _showAddPageDialog,
+              ),
+              IconButton(
+                icon: const FaIcon(
+                  FontAwesomeIcons.discord,
+                  color: Color(0xFF5865F2),
+                  size: 24,
+                ),
+                tooltip: widget.currentUserSettings?.discordWebhookUrl != null
+                    ? 'Edit Discord webhook'
+                    : 'Set Discord webhook',
+                onPressed: _showDiscordWebhookDialog,
+              ),
+            ],
+          ),
           const Text(
-            "Your tracked pages",
+            "My Pages",
             style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 8),
           if (widget.userPages.isEmpty)
-            const Text('No pages tracked yet. Add one below!'),
+            const Text('You have not added any pages yet.'),
           ...widget.userPages.map(
-            (entry) => ListTile(
-              title: Text(entry.urlName ?? entry.url),
-              subtitle: entry.urlName != null ? Text(entry.url) : null,
-              trailing: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  IconButton(
-                    icon: const Icon(Icons.edit),
-                    onPressed: () => _showEditDialog(entry),
-                  ),
-                  IconButton(
-                    icon: const Icon(Icons.delete),
-                    onPressed: () => widget.onDeleteUrl(entry.id),
-                  ),
-                ],
+            (entry) => Card(
+              margin: const EdgeInsets.symmetric(vertical: 8),
+              child: ListTile(
+                title: PageStatusRowWidget(page: entry, timezone: "Europe/Prague"),
+                trailing: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    IconButton(
+                      icon: const Icon(Icons.edit),
+                      onPressed: () => _showEditDialog(entry),
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.delete),
+                      onPressed: () => _showDeleteConfirmDialog(entry.id),
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
-          const SizedBox(height: 16),
-          TextField(
-            controller: _urlNameController,
-            decoration: const InputDecoration(
-              labelText: 'Page Name (Optional)',
-              border: OutlineInputBorder(),
-            ),
-          ),
-          const SizedBox(height: 8),
-          TextField(
-            controller: _urlController,
-            decoration: const InputDecoration(
-              labelText: 'URL to track',
-              border: OutlineInputBorder(),
-            ),
-            onSubmitted: (_) => _submitUrl(),
-          ),
-          const SizedBox(height: 16),
-          ElevatedButton(
-            onPressed: _submitUrl,
-            child: const Text('Add URL'),
-          ),
-          const Divider(height: 32),
-
-          const Text(
-            "Discord Webhook Settings",
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 8),
-          TextField(
-            controller: _webhookController,
-            decoration: const InputDecoration(
-              labelText: 'Discord Webhook URL',
-              hintText: 'Enter URL for notifications',
-              border: OutlineInputBorder(),
-            ),
-            keyboardType: TextInputType.url,
-          ),
-          const SizedBox(height: 8),
-          ElevatedButton(
-            onPressed: _startDiscordWebhookVerification,
-            child: const Text('Verify & Save Webhook'),
-          ),
+          const SizedBox(height: 24),
           const Divider(height: 32),
         ],
 
-        Text(
-          widget.isLoggedIn ? "Example projects" : "Preview (not logged in)",
-          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+        // PUBLIC PAGES BELOW
+        const Text(
+          "Public pages / Example projects",
+          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 8),
-        ...widget.publicPages.map((entry) => ListTile(
-          title: Text(entry.urlName ?? entry.url),
-          subtitle: entry.urlName != null ? Text(entry.url) : null,
-        )),
+        ...widget.publicPages.map(
+          (entry) => Card(
+            margin: const EdgeInsets.symmetric(vertical: 8),
+            child: ListTile(
+              title: PageStatusRowWidget(page: entry, timezone: "Europe/Prague"),
+            ),
+          ),
+        ),
       ],
     );
   }

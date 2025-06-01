@@ -14,7 +14,7 @@ class UserSettings {
     return UserSettings(
       userId: json['user_id'] as String,
       discordWebhookUrl: json['discord_webhook_url'] as String?,
-      isAdmin: json['is_admin'] as bool,
+      isAdmin: (json['is_admin'] ?? false) as bool,
     );
   }
 

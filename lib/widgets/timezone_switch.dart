@@ -30,7 +30,7 @@ class TimezoneSwitchWidget extends StatelessWidget {
           children: const [
             Padding(
               padding: EdgeInsets.symmetric(horizontal: 10),
-              child: Text('Praha', style: TextStyle(fontSize: 13)),
+              child: Text('Prague', style: TextStyle(fontSize: 13)),
             ),
             Padding(
               padding: EdgeInsets.symmetric(horizontal: 10),
