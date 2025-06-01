@@ -23,7 +23,7 @@ class PageStatusRowWidget extends StatelessWidget {
           return const Center(child: CircularProgressIndicator());
         }
         if (!snapshot.hasData) {
-          return const Text('Chyba při načítání statusů.');
+          return const Text('Error loading statuses.');
         }
 
         final List<PageStatus> statuses = snapshot.data![0] as List<PageStatus>;
@@ -40,7 +40,7 @@ class PageStatusRowWidget extends StatelessWidget {
         });
         final today = "${now.year.toString().padLeft(4, '0')}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}";
 
-        // Seznam dvojic: (status, day)
+        // List of pairs: (status, day)
         final ovals = [
           ...prevDays.map((day) => (statusByDay[day] ?? 'grey', day)),
           (latestStatus?.status ?? 'grey', today),
@@ -100,7 +100,7 @@ class _StatusOval extends StatelessWidget {
         color = Colors.grey.shade400;
     }
 
-    // Převod YYYY-MM-DD na pěkný formát
+    // Convert YYYY-MM-DD to a nice format
     String formattedDate;
     try {
       final date = DateTime.parse(day);
@@ -109,7 +109,7 @@ class _StatusOval extends StatelessWidget {
       formattedDate = day;
     }
 
-    // Text statusu pro tooltip
+    // Status text for tooltip
     String statusText;
     switch (status) {
       case 'green':

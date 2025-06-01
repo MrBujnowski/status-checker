@@ -33,7 +33,7 @@ class _LoginPageState extends State<LoginPage> {
     final String? error = await magicLinkService.sendMagicLink(email);
     setState(() {
       if (error == null) {
-        message = 'Zkontroluj email a klikni na odkaz pro přihlášení.';
+        message = 'Check your email and click the link to log in.';
       } else {
         message = error;
       }
@@ -45,12 +45,12 @@ class _LoginPageState extends State<LoginPage> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Přihlášení / registrace'),
+        title: const Text('Login / Registration'),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             const Text(
-              'Zadej svůj email. Není třeba se registrovat – stačí email, odešleme ti přihlašovací odkaz.',
+              'Enter your email. You don\'t need to register – just enter your email, we\'ll send you a login link.',
               style: TextStyle(fontSize: 14),
               textAlign: TextAlign.center,
             ),
@@ -69,7 +69,7 @@ class _LoginPageState extends State<LoginPage> {
                       height: 18,
                       child: CircularProgressIndicator(strokeWidth: 2),
                     )
-                  : const Text('Odeslat magic link'),
+                  : const Text('Send magic link'),
             ),
             if (message != null) ...[
               const SizedBox(height: 12),
@@ -101,7 +101,7 @@ class _LoginPageState extends State<LoginPage> {
           IconButton(
             icon: const Icon(Icons.login),
             onPressed: _showLoginDialog,
-            tooltip: 'Přihlášení',
+            tooltip: 'Login',
           ),
         ],
       ),
@@ -126,7 +126,7 @@ class _LoginPageState extends State<LoginPage> {
                     if (!snapshot.hasData || snapshot.data!.isEmpty) {
                       return const Padding(
                         padding: EdgeInsets.only(top: 60.0),
-                        child: Text('Žádné veřejné stránky', textAlign: TextAlign.center),
+                        child: Text('No public pages', textAlign: TextAlign.center),
                       );
                     }
                     final publicPages = snapshot.data!;

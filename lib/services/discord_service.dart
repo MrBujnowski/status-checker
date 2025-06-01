@@ -19,5 +19,14 @@ class DiscordService {
     return response.statusCode == 204 || response.statusCode == 200;
   }
 
+  Future<bool> sendSimpleMessage(String webhookUrl, String content) async {
+    final response = await http.post(
+      Uri.parse(webhookUrl),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({'content': content}),
+    );
+    return response.statusCode == 204 || response.statusCode == 200;
+  }
+
   bool verifyCode(String entered) => entered == _lastCode;
 }

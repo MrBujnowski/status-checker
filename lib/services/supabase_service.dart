@@ -153,7 +153,7 @@ class SupabaseService {
     }
   }
 
-  /// Vrátí statusy za posledních 30 dní (UTC nebo Prague)
+  /// Returns statuses for the last 30 days (UTC or Prague)
   Future<List<PageStatus>> loadPageDailyStatuses(String pageId, {String timezone = 'UTC'}) async {
     try {
       final List<dynamic> result = await _supabase
@@ -171,16 +171,16 @@ class SupabaseService {
     }
   }
 
-  /// Vrátí poslední status (dnešní den) pro konkrétní stránku a zónu
+  /// Returns the latest status (today) for a specific page and zone
   Future<PageStatus?> loadPageLatestStatus(String pageId, {String timezone = 'UTC'}) async {
     try {
-      // Zjisti začátek a konec dne v požadovaném časovém pásmu
+      // Determine the start and end of the day in the desired time zone
       DateTime now = DateTime.now().toUtc();
       DateTime startOfDay;
       DateTime endOfDay;
 
       if (timezone == 'Europe/Prague') {
-        // Najdi dnesní půlnoc v Praze v UTC (i při letním/zimním čase)
+        // Find today's midnight in Prague in UTC (including daylight saving time)
         final localNow = DateTime.now();
         startOfDay = DateTime(localNow.year, localNow.month, localNow.day).toUtc().subtract(localNow.timeZoneOffset);
         endOfDay = startOfDay.add(const Duration(hours: 24));
@@ -190,7 +190,7 @@ class SupabaseService {
         endOfDay = startOfDay.add(const Duration(hours: 24));
       }
 
-      // Filtrování logů podle období
+      // Filter logs by the period
       final String startIso = DateFormat("yyyy-MM-ddTHH:mm:ss'Z'").format(startOfDay);
       final String endIso = DateFormat("yyyy-MM-ddTHH:mm:ss'Z'").format(endOfDay);
 
@@ -229,6 +229,25 @@ class SupabaseService {
       );
     } catch (e) {
       print('Error loading latest status from logs: $e');
+      return null;
+    }
+  }
+
+  Future<String?> loadDiscordWebhookUrl() async {
+    final user = _supabase.auth.currentUser;
+    if (user == null) return null;
+    try {
+      final List<dynamic> result = await _supabase
+          .from('user_settings')
+          .select('discord_webhook_url')
+          .eq('user_id', user.id)
+          .limit(1);
+      if (result.isNotEmpty && result[0]['discord_webhook_url'] != null) {
+        return result[0]['discord_webhook_url'] as String;
+      }
+      return null;
+    } catch (e) {
+      print('Error loading discord webhook: $e');
       return null;
     }
   }

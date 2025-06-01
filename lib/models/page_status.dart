@@ -1,7 +1,7 @@
 class PageStatus {
   final String status;    // green/orange/red/grey
   final String day;       // YYYY-MM-DD
-  final String timezone;  // UTC nebo Europe/Prague
+  final String timezone;  // UTC or Europe/Prague
 
   PageStatus({
     required this.status,

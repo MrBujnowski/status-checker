@@ -9,4 +9,4 @@ chrome:
 		fi; \
 	done < .env; \
 	echo "👉 Running: flutter run -d chrome $$dart_defines"; \
-	flutter run -d chrome $$dart_defines
+	flutter run -d chrome --web-port 5000 $$dart_defines
