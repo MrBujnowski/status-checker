@@ -4,6 +4,7 @@ import 'services/supabase_service.dart';
 import 'models/url_entry.dart';
 import 'widgets/timezone_switch.dart';
 import 'widgets/page_status_row.dart';
+import 'widgets/theme_switch.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -91,6 +92,7 @@ class _LoginPageState extends State<LoginPage> {
       appBar: AppBar(
         title: const SizedBox(),
         actions: [
+          const ThemeSwitchWidget(),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 8),
             child: TimezoneSwitchWidget(

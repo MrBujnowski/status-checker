@@ -8,6 +8,7 @@ import 'services/discord_service.dart';
 import 'login_page.dart';
 import 'widgets/home_content.dart';
 import 'widgets/timezone_switch.dart';
+import 'widgets/theme_switch.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -169,6 +170,7 @@ class _HomePageState extends State<HomePage> {
         appBar: AppBar(
           title: const Text('Status Checker'),
           actions: [
+            const ThemeSwitchWidget(),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 8),
               child: TimezoneSwitchWidget(
