@@ -7,6 +7,7 @@ import 'services/supabase_service.dart';
 import 'services/discord_service.dart';
 import 'login_page.dart';
 import 'widgets/home_content.dart';
+import 'widgets/timezone_switch.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -25,6 +26,7 @@ class _HomePageState extends State<HomePage> {
   UserSettings? currentUserSettings;
   bool isLoading = true;
   bool isLoggedIn = false;
+  String timezone = 'Europe/Prague';
 
   @override
   void initState() {
@@ -163,29 +165,37 @@ class _HomePageState extends State<HomePage> {
       );
     }
 
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Status Checker'),
-        actions: [
-          if (isLoggedIn)
-            IconButton(
-              icon: const Icon(Icons.logout),
-              tooltip: 'Logout',
-              onPressed: _signOut,
+      return Scaffold(
+        appBar: AppBar(
+          title: const Text('Status Checker'),
+          actions: [
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8),
+              child: TimezoneSwitchWidget(
+                selectedTimezone: timezone,
+                onChanged: (tz) => setState(() => timezone = tz),
+              ),
             ),
-        ],
-      ),
-      body: HomeContent(
-        isLoggedIn: isLoggedIn,
-        publicPages: publicPages,
-        userPages: userPages,
-        onAddUrl: _addUserUrl,
-        onDeleteUrl: _deleteUserUrl,
-        onEditUrl: _editUserUrl,
-        currentUserSettings: currentUserSettings,
-        onUpdateUserSettings: _updateUserSettings,
-        onLoadDiscordWebhookUrl: _loadDiscordWebhookUrl,
-      ),
-    );
+            if (isLoggedIn)
+              IconButton(
+                icon: const Icon(Icons.logout),
+                tooltip: 'Logout',
+                onPressed: _signOut,
+              ),
+          ],
+        ),
+        body: HomeContent(
+          isLoggedIn: isLoggedIn,
+          publicPages: publicPages,
+          userPages: userPages,
+          onAddUrl: _addUserUrl,
+          onDeleteUrl: _deleteUserUrl,
+          onEditUrl: _editUserUrl,
+          currentUserSettings: currentUserSettings,
+          onUpdateUserSettings: _updateUserSettings,
+          onLoadDiscordWebhookUrl: _loadDiscordWebhookUrl,
+          timezone: timezone,
+        ),
+      );
   }
 }

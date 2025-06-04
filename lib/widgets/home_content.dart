@@ -15,6 +15,7 @@ class HomeContent extends StatefulWidget {
   final UserSettings? currentUserSettings;
   final Future<void> Function({String? discordWebhookUrl, bool? isAdmin}) onUpdateUserSettings;
   final Future<String?> Function() onLoadDiscordWebhookUrl;
+  final String timezone;
 
   const HomeContent({
     super.key,
@@ -27,6 +28,7 @@ class HomeContent extends StatefulWidget {
     this.currentUserSettings,
     required this.onUpdateUserSettings,
     required this.onLoadDiscordWebhookUrl,
+    required this.timezone,
   });
 
   @override
@@ -320,7 +322,7 @@ class _HomeContentState extends State<HomeContent> {
             (entry) => Card(
               margin: const EdgeInsets.symmetric(vertical: 8),
               child: ListTile(
-                title: PageStatusRowWidget(page: entry, timezone: "Europe/Prague"),
+                title: PageStatusRowWidget(page: entry, timezone: widget.timezone),
                 trailing: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
@@ -351,7 +353,7 @@ class _HomeContentState extends State<HomeContent> {
           (entry) => Card(
             margin: const EdgeInsets.symmetric(vertical: 8),
             child: ListTile(
-              title: PageStatusRowWidget(page: entry, timezone: "Europe/Prague"),
+              title: PageStatusRowWidget(page: entry, timezone: widget.timezone),
             ),
           ),
         ),
