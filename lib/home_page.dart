@@ -9,6 +9,7 @@ import 'login_page.dart';
 import 'widgets/home_content.dart';
 import 'widgets/timezone_switch.dart';
 import 'widgets/theme_switch.dart';
+import 'ui_constants.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -172,7 +173,7 @@ class _HomePageState extends State<HomePage> {
           actions: [
             const ThemeSwitchWidget(),
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8),
+              padding: const EdgeInsets.symmetric(horizontal: kPaddingSmall),
               child: TimezoneSwitchWidget(
                 selectedTimezone: timezone,
                 onChanged: (tz) => setState(() => timezone = tz),

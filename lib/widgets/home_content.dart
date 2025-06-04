@@ -4,6 +4,7 @@ import '../models/url_entry.dart';
 import '../models/user_settings.dart';
 import '../services/discord_service.dart';
 import 'page_status_row.dart';
+import '../ui_constants.dart';
 
 class HomeContent extends StatefulWidget {
   final bool isLoggedIn;
@@ -287,7 +288,7 @@ class _HomeContentState extends State<HomeContent> {
   @override
   Widget build(BuildContext context) {
     return ListView(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(kPadding),
       children: [
         if (widget.isLoggedIn) ...[
           Row(
@@ -320,7 +321,7 @@ class _HomeContentState extends State<HomeContent> {
             const Text('You have not added any pages yet.'),
           ...widget.userPages.map(
             (entry) => Card(
-              margin: const EdgeInsets.symmetric(vertical: 8),
+              margin: const EdgeInsets.symmetric(vertical: kPaddingSmall),
               child: ListTile(
                 title: PageStatusRowWidget(page: entry, timezone: widget.timezone),
                 trailing: Row(
@@ -351,7 +352,7 @@ class _HomeContentState extends State<HomeContent> {
         const SizedBox(height: 8),
         ...widget.publicPages.map(
           (entry) => Card(
-            margin: const EdgeInsets.symmetric(vertical: 8),
+            margin: const EdgeInsets.symmetric(vertical: kPaddingSmall),
             child: ListTile(
               title: PageStatusRowWidget(page: entry, timezone: widget.timezone),
             ),

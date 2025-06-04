@@ -10,9 +10,16 @@ class ThemeSwitchWidget extends StatelessWidget {
     final themeNotifier = Provider.of<ThemeNotifier>(context);
     final isDark = themeNotifier.mode == ThemeMode.dark;
     return IconButton(
-      icon: Icon(isDark ? Icons.light_mode : Icons.dark_mode),
+      iconSize: 28,
       tooltip: isDark ? 'Switch to light mode' : 'Switch to dark mode',
       onPressed: themeNotifier.toggleMode,
+      icon: AnimatedSwitcher(
+        duration: const Duration(milliseconds: 200),
+        child: Icon(
+          isDark ? Icons.light_mode : Icons.dark_mode,
+          key: ValueKey(isDark),
+        ),
+      ),
     );
   }
 }

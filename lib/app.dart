@@ -19,9 +19,11 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         brightness: Brightness.light,
         useMaterial3: true,
+        visualDensity: VisualDensity.adaptivePlatformDensity,
         textTheme:
             GoogleFonts.interTextTheme(ThemeData(brightness: Brightness.light).textTheme),
         colorScheme: const ColorScheme.light().copyWith(background: Colors.white),
+        scaffoldBackgroundColor: Colors.white,
         cardTheme: CardTheme(
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(kBorderRadius),
@@ -36,14 +38,24 @@ class MyApp extends StatelessWidget {
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(kBorderRadius),
           ),
+        ),
+        tooltipTheme: TooltipThemeData(
+          decoration: BoxDecoration(
+            color: Colors.grey[900],
+            borderRadius: BorderRadius.circular(kBorderRadius),
+            border: Border.all(color: Colors.white24),
+          ),
+          textStyle: const TextStyle(color: Colors.white),
         ),
       ),
       darkTheme: ThemeData(
         brightness: Brightness.dark,
         useMaterial3: true,
+        visualDensity: VisualDensity.adaptivePlatformDensity,
         textTheme:
             GoogleFonts.interTextTheme(ThemeData(brightness: Brightness.dark).textTheme),
         colorScheme: const ColorScheme.dark().copyWith(background: Colors.black),
+        scaffoldBackgroundColor: Colors.black,
         cardTheme: CardTheme(
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(kBorderRadius),
@@ -58,6 +70,14 @@ class MyApp extends StatelessWidget {
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(kBorderRadius),
           ),
+        ),
+        tooltipTheme: TooltipThemeData(
+          decoration: BoxDecoration(
+            color: Colors.grey[900],
+            borderRadius: BorderRadius.circular(kBorderRadius),
+            border: Border.all(color: Colors.white24),
+          ),
+          textStyle: const TextStyle(color: Colors.white),
         ),
       ),
       home: const AuthGate(),

@@ -5,6 +5,7 @@ import 'models/url_entry.dart';
 import 'widgets/timezone_switch.dart';
 import 'widgets/page_status_row.dart';
 import 'widgets/theme_switch.dart';
+import 'ui_constants.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -94,7 +95,7 @@ class _LoginPageState extends State<LoginPage> {
         actions: [
           const ThemeSwitchWidget(),
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8),
+            padding: const EdgeInsets.symmetric(horizontal: kPaddingSmall),
             child: TimezoneSwitchWidget(
               selectedTimezone: timezone,
               onChanged: (tz) => setState(() => timezone = tz),
@@ -115,19 +116,19 @@ class _LoginPageState extends State<LoginPage> {
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                const SizedBox(height: 60),
+                const SizedBox(height: kPaddingXLarge),
                 FutureBuilder<List<UrlEntry>>(
                   future: supabaseService.loadPublicPages(),
                   builder: (context, snapshot) {
                     if (snapshot.connectionState == ConnectionState.waiting) {
                       return const Padding(
-                        padding: EdgeInsets.only(top: 60.0),
+                        padding: EdgeInsets.only(top: kPaddingXLarge),
                         child: CircularProgressIndicator(),
                       );
                     }
                     if (!snapshot.hasData || snapshot.data!.isEmpty) {
                       return const Padding(
-                        padding: EdgeInsets.only(top: 60.0),
+                        padding: EdgeInsets.only(top: kPaddingXLarge),
                         child: Text('No public pages', textAlign: TextAlign.center),
                       );
                     }
@@ -137,7 +138,7 @@ class _LoginPageState extends State<LoginPage> {
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: publicPages
                           .map((page) => Padding(
-                                padding: const EdgeInsets.symmetric(vertical: 32.0),
+                                padding: const EdgeInsets.symmetric(vertical: kPaddingXXLarge),
                                 child: PageStatusRowWidget(page: page, timezone: timezone),
                               ))
                           .toList(),

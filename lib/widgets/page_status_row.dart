@@ -85,19 +85,20 @@ class _StatusOval extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
     Color color;
     switch (status) {
       case 'green':
-        color = Colors.green;
+        color = scheme.tertiary;
         break;
       case 'red':
-        color = Colors.red;
+        color = scheme.error;
         break;
       case 'orange':
-        color = Colors.orange;
+        color = scheme.primary;
         break;
       default:
-        color = Colors.grey.shade400;
+        color = scheme.outlineVariant;
     }
 
     // Convert YYYY-MM-DD to a nice format
@@ -127,13 +128,6 @@ class _StatusOval extends StatelessWidget {
 
     return Tooltip(
       message: "$formattedDate\n$statusText",
-      decoration: BoxDecoration(
-        color: Colors.grey[900],
-        borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: Colors.white24),
-      ),
-      textStyle: const TextStyle(color: Colors.white),
-      padding: const EdgeInsets.all(10),
       preferBelow: false,
       child: Container(
         width: 14,

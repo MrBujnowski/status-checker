@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'dart:async';
+import '../ui_constants.dart';
 
 class TimezoneSwitchWidget extends StatefulWidget {
   final String selectedTimezone;
@@ -62,30 +63,18 @@ class _TimezoneSwitchWidgetState extends State<TimezoneSwitchWidget> {
     return Row(
       children: [
         const Icon(Icons.access_time, size: 18),
-        const SizedBox(width: 4),
+        const SizedBox(width: kPaddingSmall),
         Text(_formattedTime(), style: const TextStyle(fontSize: 13)),
-        const SizedBox(width: 8),
-        ToggleButtons(
-          isSelected: [
-            widget.selectedTimezone == 'Europe/Prague',
-            widget.selectedTimezone == 'UTC',
+        const SizedBox(width: kPaddingSmall),
+        SegmentedButton<String>(
+          segments: const [
+            ButtonSegment(value: 'Europe/Prague', label: Text('Prague')),
+            ButtonSegment(value: 'UTC', label: Text('UTC')),
           ],
-          onPressed: (idx) {
-            if (idx == 0) widget.onChanged('Europe/Prague');
-            if (idx == 1) widget.onChanged('UTC');
+          selected: {widget.selectedTimezone},
+          onSelectionChanged: (values) {
+            if (values.isNotEmpty) widget.onChanged(values.first);
           },
-          borderRadius: BorderRadius.circular(6),
-          constraints: const BoxConstraints(minWidth: 44, minHeight: 32),
-          children: const [
-            Padding(
-              padding: EdgeInsets.symmetric(horizontal: 10),
-              child: Text('Prague', style: TextStyle(fontSize: 13)),
-            ),
-            Padding(
-              padding: EdgeInsets.symmetric(horizontal: 10),
-              child: Text('UTC', style: TextStyle(fontSize: 13)),
-            ),
-          ],
         ),
       ],
     );
