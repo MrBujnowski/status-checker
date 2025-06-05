@@ -10,7 +10,14 @@ import 'widgets/home_content.dart';
 import 'widgets/timezone_switch.dart';
 
 class HomePage extends StatefulWidget {
-  const HomePage({super.key});
+  final void Function() onToggleTheme;
+  final ThemeMode themeMode;
+
+  const HomePage({
+    super.key,
+    required this.onToggleTheme,
+    required this.themeMode,
+  });
 
   @override
   State<HomePage> createState() => _HomePageState();
@@ -71,12 +78,10 @@ class _HomePageState extends State<HomePage> {
   Future<void> _addUserUrl(String url, String? urlName) async {
     String finalUrl = url.trim();
 
-    // Add https:// if not at the beginning
     if (!finalUrl.startsWith('http://') && !finalUrl.startsWith('https://')) {
       finalUrl = 'https://$finalUrl';
     }
 
-    // URL validation
     if (!isValidUrl(finalUrl)) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -86,7 +91,6 @@ class _HomePageState extends State<HomePage> {
       return;
     }
 
-    // Check for duplicates
     final exists = userPages.any((entry) => entry.url == finalUrl);
     if (exists) {
       if (mounted) {
@@ -151,7 +155,12 @@ class _HomePageState extends State<HomePage> {
     await supabase.auth.signOut();
     if (mounted) {
       Navigator.of(context).pushAndRemoveUntil(
-        MaterialPageRoute(builder: (_) => const LoginPage()),
+        MaterialPageRoute(
+          builder: (_) => LoginPage(
+            onToggleTheme: widget.onToggleTheme,
+            themeMode: widget.themeMode,
+          ),
+        ),
         (route) => false,
       );
     }
@@ -165,37 +174,52 @@ class _HomePageState extends State<HomePage> {
       );
     }
 
-      return Scaffold(
-        appBar: AppBar(
-          title: const Text('Status Checker'),
-          actions: [
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8),
-              child: TimezoneSwitchWidget(
-                selectedTimezone: timezone,
-                onChanged: (tz) => setState(() => timezone = tz),
-              ),
+    return Scaffold(
+      // === ŽÁDNÝ APPBAR, jen horní řádek jako na loginu ===
+      appBar: PreferredSize(
+        preferredSize: const Size.fromHeight(60),
+        child: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.only(top: 6, right: 10),
+            child: Row(
+              children: [
+                const Spacer(),
+                TimezoneSwitchWidget(
+                  selectedTimezone: timezone,
+                  onChanged: (tz) => setState(() => timezone = tz),
+                ),
+                const SizedBox(width: 10),
+                IconButton(
+                  icon: Icon(
+                    widget.themeMode == ThemeMode.dark ? Icons.light_mode : Icons.dark_mode,
+                    size: 25,
+                  ),
+                  onPressed: widget.onToggleTheme,
+                  tooltip: 'Switch light/dark theme',
+                ),
+                if (isLoggedIn)
+                  IconButton(
+                    icon: const Icon(Icons.logout),
+                    tooltip: 'Logout',
+                    onPressed: _signOut,
+                  ),
+              ],
             ),
-            if (isLoggedIn)
-              IconButton(
-                icon: const Icon(Icons.logout),
-                tooltip: 'Logout',
-                onPressed: _signOut,
-              ),
-          ],
+          ),
         ),
-        body: HomeContent(
-          isLoggedIn: isLoggedIn,
-          publicPages: publicPages,
-          userPages: userPages,
-          onAddUrl: _addUserUrl,
-          onDeleteUrl: _deleteUserUrl,
-          onEditUrl: _editUserUrl,
-          currentUserSettings: currentUserSettings,
-          onUpdateUserSettings: _updateUserSettings,
-          onLoadDiscordWebhookUrl: _loadDiscordWebhookUrl,
-          timezone: timezone,
-        ),
-      );
+      ),
+      body: HomeContent(
+        isLoggedIn: isLoggedIn,
+        publicPages: publicPages,
+        userPages: userPages,
+        onAddUrl: _addUserUrl,
+        onDeleteUrl: _deleteUserUrl,
+        onEditUrl: _editUserUrl,
+        currentUserSettings: currentUserSettings,
+        onUpdateUserSettings: _updateUserSettings,
+        onLoadDiscordWebhookUrl: _loadDiscordWebhookUrl,
+        timezone: timezone,
+      ),
+    );
   }
 }

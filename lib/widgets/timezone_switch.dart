@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'dart:async';
 
 class TimezoneSwitchWidget extends StatefulWidget {
@@ -59,35 +60,64 @@ class _TimezoneSwitchWidgetState extends State<TimezoneSwitchWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      children: [
-        const Icon(Icons.access_time, size: 18),
-        const SizedBox(width: 4),
-        Text(_formattedTime(), style: const TextStyle(fontSize: 13)),
-        const SizedBox(width: 8),
-        ToggleButtons(
-          isSelected: [
-            widget.selectedTimezone == 'Europe/Prague',
-            widget.selectedTimezone == 'UTC',
-          ],
-          onPressed: (idx) {
-            if (idx == 0) widget.onChanged('Europe/Prague');
-            if (idx == 1) widget.onChanged('UTC');
-          },
-          borderRadius: BorderRadius.circular(6),
-          constraints: const BoxConstraints(minWidth: 44, minHeight: 32),
-          children: const [
-            Padding(
-              padding: EdgeInsets.symmetric(horizontal: 10),
-              child: Text('Prague', style: TextStyle(fontSize: 13)),
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surfaceVariant.withOpacity(0.44),
+        borderRadius: BorderRadius.circular(14),
+      ),
+      child: Row(
+        children: [
+          const Icon(Icons.access_time, size: 18),
+          const SizedBox(width: 8),
+          Text(
+            _formattedTime(),
+            style: GoogleFonts.inter(fontSize: 15, fontWeight: FontWeight.w600),
+          ),
+          const SizedBox(width: 14),
+          SegmentedButton<String>(
+            style: ButtonStyle(
+              visualDensity: VisualDensity.compact,
+              padding: WidgetStateProperty.all(const EdgeInsets.symmetric(horizontal: 9)),
+              shape: WidgetStateProperty.all(
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+              ),
+              textStyle: WidgetStateProperty.all(
+                GoogleFonts.inter(fontSize: 13, fontWeight: FontWeight.w500),
+              ),
             ),
-            Padding(
-              padding: EdgeInsets.symmetric(horizontal: 10),
-              child: Text('UTC', style: TextStyle(fontSize: 13)),
-            ),
-          ],
-        ),
-      ],
+            segments: const [
+              ButtonSegment(
+                value: 'Europe/Prague',
+                label: SizedBox(
+                  width: 52, // zajistí, že "Prague" zůstane na jednom řádku
+                  child: Text(
+                    'Prague',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+              ),
+              ButtonSegment(
+                value: 'UTC',
+                label: SizedBox(
+                  width: 40,
+                  child: Text(
+                    'UTC',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+              ),
+            ],
+            selected: {widget.selectedTimezone},
+            onSelectionChanged: (values) => widget.onChanged(values.first),
+            showSelectedIcon: false,
+          ),
+        ],
+      ),
     );
   }
 }

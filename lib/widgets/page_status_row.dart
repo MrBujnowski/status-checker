@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import '../models/url_entry.dart';
 import '../models/page_status.dart';
@@ -40,78 +41,93 @@ class PageStatusRowWidget extends StatelessWidget {
         });
         final today = "${now.year.toString().padLeft(4, '0')}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}";
 
-        // List of pairs: (status, day)
         final ovals = [
           ...prevDays.map((day) => (statusByDay[day] ?? 'grey', day)),
           (latestStatus?.status ?? 'grey', today),
         ];
 
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            Text(
-              page.urlName?.isNotEmpty == true ? page.urlName! : page.url,
-              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 2),
-            Text(
-              page.url,
-              style: const TextStyle(
-                fontSize: 14,
-                color: Colors.grey,
+        return Padding(
+          padding: const EdgeInsets.symmetric(vertical: 22), // větší mezery mezi bloky
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Text(
+                page.urlName?.isNotEmpty == true ? page.urlName! : page.url,
+                style: GoogleFonts.epilogue(
+                  fontWeight: FontWeight.w700,
+                  fontSize: 21,
+                  letterSpacing: -0.5,
+                ),
+                textAlign: TextAlign.center,
               ),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 10),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                for (final tuple in ovals)
-                  _StatusOval(status: tuple.$1, day: tuple.$2),
-              ],
-            ),
-          ],
+              const SizedBox(height: 2),
+              Text(
+                page.url,
+                style: GoogleFonts.inter(
+                  fontSize: 12,
+                  color: Theme.of(context).colorScheme.onSurface.withOpacity(0.45),
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 14),
+              SizedBox(
+                height: 30,
+                child: ListView(
+                  scrollDirection: Axis.horizontal,
+                  shrinkWrap: true,
+                  children: [
+                    for (final tuple in ovals)
+                      _StatusOval(status: tuple.$1, day: tuple.$2),
+                  ],
+                ),
+              ),
+            ],
+          ),
         );
       },
     );
   }
 }
 
-class _StatusOval extends StatelessWidget {
+class _StatusOval extends StatefulWidget {
   final String status;
   final String day;
   const _StatusOval({required this.status, required this.day});
 
   @override
+  State<_StatusOval> createState() => _StatusOvalState();
+}
+
+class _StatusOvalState extends State<_StatusOval> {
+  bool _hovered = false;
+
+  @override
   Widget build(BuildContext context) {
     Color color;
-    switch (status) {
+    switch (widget.status) {
       case 'green':
-        color = Colors.green;
+        color = const Color(0xFF34D399); // emerald green
         break;
       case 'red':
-        color = Colors.red;
+        color = const Color(0xFFEF4444); // modern red
         break;
       case 'orange':
-        color = Colors.orange;
+        color = const Color(0xFFF59E42); // modern orange
         break;
       default:
         color = Colors.grey.shade400;
     }
 
-    // Convert YYYY-MM-DD to a nice format
     String formattedDate;
     try {
-      final date = DateTime.parse(day);
+      final date = DateTime.parse(widget.day);
       formattedDate = DateFormat('MMM d, yyyy').format(date);
     } catch (_) {
-      formattedDate = day;
+      formattedDate = widget.day;
     }
 
-    // Status text for tooltip
     String statusText;
-    switch (status) {
+    switch (widget.status) {
       case 'green':
         statusText = "No incidents";
         break;
@@ -125,23 +141,42 @@ class _StatusOval extends StatelessWidget {
         statusText = "No data";
     }
 
-    return Tooltip(
-      message: "$formattedDate\n$statusText",
-      decoration: BoxDecoration(
-        color: Colors.grey[900],
-        borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: Colors.white24),
-      ),
-      textStyle: const TextStyle(color: Colors.white),
-      padding: const EdgeInsets.all(10),
-      preferBelow: false,
-      child: Container(
-        width: 14,
-        height: 28,
-        margin: const EdgeInsets.symmetric(horizontal: 2),
+    return MouseRegion(
+      onEnter: (_) => setState(() => _hovered = true),
+      onExit: (_) => setState(() => _hovered = false),
+      child: Tooltip(
+        message: "$formattedDate\n$statusText",
         decoration: BoxDecoration(
-          color: color,
-          borderRadius: BorderRadius.circular(8),
+          color: Colors.black.withOpacity(0.94),
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(color: Colors.white24),
+        ),
+        textStyle: GoogleFonts.inter(color: Colors.white, fontSize: 13),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        preferBelow: false,
+        waitDuration: Duration.zero, // tooltip hned
+        child: Transform.translate(
+          offset: _hovered ? const Offset(0, -2) : Offset.zero, // animace nahoru
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 120),
+            margin: const EdgeInsets.symmetric(horizontal: 1.3),
+            width: 15,
+            height: 28,
+            decoration: BoxDecoration(
+              color: color,
+              borderRadius: BorderRadius.circular(8),
+              boxShadow: _hovered
+                  ? [
+                      BoxShadow(
+                        color: color.withOpacity(0.36),
+                        blurRadius: 8,
+                        offset: const Offset(0, 1),
+                      ),
+                    ]
+                  : [],
+            ),
+            child: const SizedBox.expand(),
+          ),
         ),
       ),
     );

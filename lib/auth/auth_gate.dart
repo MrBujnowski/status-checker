@@ -1,6 +1,3 @@
-// Handles routing based on authentication state.
-// Displays either the dashboard or login prompt.
-
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -8,7 +5,14 @@ import '../home_page.dart';
 import '../login_page.dart';
 
 class AuthGate extends StatefulWidget {
-  const AuthGate({super.key});
+  final void Function() onToggleTheme;
+  final ThemeMode themeMode;
+
+  const AuthGate({
+    super.key,
+    required this.onToggleTheme,
+    required this.themeMode,
+  });
 
   @override
   State<AuthGate> createState() => _AuthGateState();
@@ -27,7 +31,6 @@ class _AuthGateState extends State<AuthGate> {
     try {
       await Supabase.instance.client.auth.getSessionFromUrl(Uri.base);
     } catch (e) {}
-
     setState(() {
       _isLoading = false;
     });
@@ -43,6 +46,16 @@ class _AuthGateState extends State<AuthGate> {
 
     final session = Supabase.instance.client.auth.currentSession;
 
-    return session != null ? const HomePage() : const LoginPage();
+    if (session != null) {
+      return HomePage(
+        onToggleTheme: widget.onToggleTheme,
+        themeMode: widget.themeMode,
+      );
+    } else {
+      return LoginPage(
+        onToggleTheme: widget.onToggleTheme,
+        themeMode: widget.themeMode,
+      );
+    }
   }
 }
