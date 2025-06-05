@@ -1,12 +1,20 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'auth/magic_link_service.dart';
 import 'services/supabase_service.dart';
 import 'models/url_entry.dart';
 import 'widgets/timezone_switch.dart';
 import 'widgets/page_status_row.dart';
+import 'widgets/online_dot.dart';
 
 class LoginPage extends StatefulWidget {
-  const LoginPage({super.key});
+  final void Function() onToggleTheme;
+  final ThemeMode themeMode;
+  const LoginPage({
+    super.key,
+    required this.onToggleTheme,
+    required this.themeMode,
+  });
 
   @override
   State<LoginPage> createState() => _LoginPageState();
@@ -41,111 +49,210 @@ class _LoginPageState extends State<LoginPage> {
     });
   }
 
-  void _showLoginDialog() {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Login / Registration'),
-        content: Column(
+void _showLoginDialog() {
+  showDialog(
+    context: context,
+    builder: (context) => AlertDialog(
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(18),
+        side: BorderSide(
+          color: Colors.white.withOpacity(0.28), // decentní světlý border
+          width: 2.0,
+        ),
+      ),
+      elevation: 14,
+      backgroundColor: Theme.of(context).dialogBackgroundColor,
+      title: Text(
+        'Login / Registration',
+        style: GoogleFonts.epilogue(fontWeight: FontWeight.w600, fontSize: 22),
+        textAlign: TextAlign.center,
+      ),
+      content: Padding(
+        padding: const EdgeInsets.all(6),
+        child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Text(
-              'Enter your email. You don\'t need to register – just enter your email, we\'ll send you a login link.',
-              style: TextStyle(fontSize: 14),
+            Text(
+              "Enter your email. You don't need to register – just enter your email, we'll send you a login link.",
+              style: GoogleFonts.inter(fontSize: 15, color: Colors.grey[700]),
               textAlign: TextAlign.center,
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 18),
             TextField(
               controller: emailController,
-              decoration: const InputDecoration(labelText: 'Email'),
+              decoration: InputDecoration(
+                labelText: 'Email',
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+              ),
               keyboardType: TextInputType.emailAddress,
             ),
-            const SizedBox(height: 16),
-            ElevatedButton(
-              onPressed: isLoading ? null : _sendLink,
-              child: isLoading
-                  ? const SizedBox(
-                      width: 18,
-                      height: 18,
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    )
-                  : const Text('Send magic link'),
+            const SizedBox(height: 18),
+            SizedBox(
+              width: double.infinity,
+              child: FilledButton.icon(
+                icon: isLoading
+                    ? const SizedBox(
+                        width: 18,
+                        height: 18,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : const Icon(Icons.mail_outline),
+                label: Text('Send magic link',
+                    style: GoogleFonts.epilogue(fontWeight: FontWeight.w600)),
+                onPressed: isLoading ? null : _sendLink,
+                style: FilledButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  textStyle: GoogleFonts.epilogue(fontSize: 16),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+              ),
             ),
             if (message != null) ...[
               const SizedBox(height: 12),
               Text(
                 message!,
-                style: const TextStyle(color: Colors.green, fontSize: 13),
+                style: GoogleFonts.inter(
+                  color: Colors.green,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                ),
                 textAlign: TextAlign.center,
               ),
             ],
           ],
         ),
       ),
-    );
-  }
+    ),
+  );
+}
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const SizedBox(),
-        actions: [
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8),
-            child: TimezoneSwitchWidget(
-              selectedTimezone: timezone,
-              onChanged: (tz) => setState(() => timezone = tz),
-            ),
-          ),
-          IconButton(
-            icon: const Icon(Icons.login),
-            onPressed: _showLoginDialog,
-            tooltip: 'Login',
-          ),
-        ],
-      ),
-      body: Center(
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 1400),
-          child: SingleChildScrollView(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.center,
+      // AppBar pouze nahoře
+      appBar: PreferredSize(
+        preferredSize: const Size.fromHeight(60),
+        child: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.only(top: 6, right: 10),
+            child: Row(
               children: [
-                const SizedBox(height: 60),
-                FutureBuilder<List<UrlEntry>>(
-                  future: supabaseService.loadPublicPages(),
-                  builder: (context, snapshot) {
-                    if (snapshot.connectionState == ConnectionState.waiting) {
-                      return const Padding(
-                        padding: EdgeInsets.only(top: 60.0),
-                        child: CircularProgressIndicator(),
-                      );
-                    }
-                    if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                      return const Padding(
-                        padding: EdgeInsets.only(top: 60.0),
-                        child: Text('No public pages', textAlign: TextAlign.center),
-                      );
-                    }
-                    final publicPages = snapshot.data!;
-                    return Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: publicPages
-                          .map((page) => Padding(
-                                padding: const EdgeInsets.symmetric(vertical: 32.0),
-                                child: PageStatusRowWidget(page: page, timezone: timezone),
-                              ))
-                          .toList(),
-                    );
-                  },
+                const Spacer(),
+                TimezoneSwitchWidget(
+                  selectedTimezone: timezone,
+                  onChanged: (tz) => setState(() => timezone = tz),
+                ),
+                const SizedBox(width: 10),
+                IconButton(
+                  icon: Icon(
+                    widget.themeMode == ThemeMode.dark
+                        ? Icons.light_mode
+                        : Icons.dark_mode,
+                    size: 25,
+                  ),
+                  onPressed: widget.onToggleTheme,
+                  tooltip: 'Switch light/dark theme',
+                ),
+                IconButton(
+                  icon: const Icon(Icons.login),
+                  onPressed: _showLoginDialog,
+                  tooltip: 'Login',
                 ),
               ],
             ),
           ),
         ),
+      ),
+      // Scrollbar bude normálně vpravo, protože ListView scrolluje celé body
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          return ListView(
+            padding: EdgeInsets.symmetric(
+              vertical: constraints.maxWidth < 650 ? 36 : 70,
+              horizontal: 0,
+            ),
+            children: [
+              Center(
+                child: Column(
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Text(
+                          'Narrativva Status',
+                          style: GoogleFonts.epilogue(
+                            fontWeight: FontWeight.w800,
+                            fontSize: 38,
+                            letterSpacing: -1.2,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                        const SizedBox(width: 12),
+                        const OnlineDot(),
+                      ],
+                    ),
+                    const SizedBox(height: 18),
+                    Text(
+                      'Live status and uptime monitoring for all Narrativva apps and websites.',
+                      style: GoogleFonts.inter(
+                        fontSize: 18,
+                        color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 36),
+                  ],
+                ),
+              ),
+              // --- public stránky ---
+              FutureBuilder<List<UrlEntry>>(
+                future: supabaseService.loadPublicPages(),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const Padding(
+                      padding: EdgeInsets.only(top: 40.0),
+                      child: Center(child: CircularProgressIndicator()),
+                    );
+                  }
+                  if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                    return Padding(
+                      padding: const EdgeInsets.only(top: 40.0),
+                      child: Center(
+                        child: Text(
+                          'No public pages available.',
+                          style: GoogleFonts.inter(color: Colors.grey[600], fontSize: 15),
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                    );
+                  }
+                  final publicPages = snapshot.data!;
+                  return Center(
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints(maxWidth: 650),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: publicPages
+                            .map((page) => Padding(
+                                  padding: const EdgeInsets.symmetric(vertical: 0.0),
+                                  child: PageStatusRowWidget(
+                                    page: page,
+                                    timezone: timezone,
+                                  ),
+                                ))
+                            .toList(),
+                      ),
+                    ),
+                  );
+                },
+              ),
+              const SizedBox(height: 48),
+            ],
+          );
+        },
       ),
     );
   }
