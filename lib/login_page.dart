@@ -29,17 +29,17 @@ class _LoginPageState extends State<LoginPage> {
   bool isLoading = false;
   String? message;
 
-  Future<void> _sendLink() async {
+  Future<void> _sendLink(StateSetter dialogSetState) async {
     final email = emailController.text.trim();
     if (email.isEmpty) return;
 
-    setState(() {
+    dialogSetState(() {
       isLoading = true;
       message = null;
     });
 
     final String? error = await magicLinkService.sendMagicLink(email);
-    setState(() {
+    dialogSetState(() {
       if (error == null) {
         message = 'Check your email and click the link to log in.';
       } else {
@@ -52,78 +52,90 @@ class _LoginPageState extends State<LoginPage> {
 void _showLoginDialog() {
   showDialog(
     context: context,
-    builder: (context) => AlertDialog(
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(18),
-        side: BorderSide(
-          color: Colors.white.withOpacity(0.28), // decentní světlý border
-          width: 2.0,
-        ),
-      ),
-      elevation: 14,
-      backgroundColor: Theme.of(context).dialogBackgroundColor,
-      title: Text(
-        'Login / Registration',
-        style: GoogleFonts.epilogue(fontWeight: FontWeight.w600, fontSize: 22),
-        textAlign: TextAlign.center,
-      ),
-      content: Padding(
-        padding: const EdgeInsets.all(6),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              "Enter your email. You don't need to register – just enter your email, we'll send you a login link.",
-              style: GoogleFonts.inter(fontSize: 15, color: Colors.grey[700]),
-              textAlign: TextAlign.center,
+    builder: (context) => StatefulBuilder(
+      builder: (context, dialogSetState) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(18),
+            side: BorderSide(
+              color: Colors.white.withOpacity(0.28),
+              width: 2.0,
             ),
-            const SizedBox(height: 18),
-            TextField(
-              controller: emailController,
-              decoration: InputDecoration(
-                labelText: 'Email',
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
-              ),
-              keyboardType: TextInputType.emailAddress,
-            ),
-            const SizedBox(height: 18),
-            SizedBox(
-              width: double.infinity,
-              child: FilledButton.icon(
-                icon: isLoading
-                    ? const SizedBox(
-                        width: 18,
-                        height: 18,
-                        child: CircularProgressIndicator(strokeWidth: 2),
-                      )
-                    : const Icon(Icons.mail_outline),
-                label: Text('Send magic link',
-                    style: GoogleFonts.epilogue(fontWeight: FontWeight.w600)),
-                onPressed: isLoading ? null : _sendLink,
-                style: FilledButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  textStyle: GoogleFonts.epilogue(fontSize: 16),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
+          ),
+          elevation: 14,
+          backgroundColor: Theme.of(context).dialogBackgroundColor,
+          title: Text(
+            'Login / Registration',
+            style: GoogleFonts.epilogue(
+                fontWeight: FontWeight.w600, fontSize: 22),
+            textAlign: TextAlign.center,
+          ),
+          content: Padding(
+            padding: const EdgeInsets.all(6),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  "Enter your email. You don't need to register – just enter your email, we'll send you a login link.",
+                  style:
+                      GoogleFonts.inter(fontSize: 15, color: Colors.grey[700]),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 18),
+                TextField(
+                  controller: emailController,
+                  decoration: InputDecoration(
+                    labelText: 'Email',
+                    border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(10)),
+                  ),
+                  keyboardType: TextInputType.emailAddress,
+                ),
+                const SizedBox(height: 18),
+                SizedBox(
+                  width: double.infinity,
+                  child: FilledButton.icon(
+                    icon: isLoading
+                        ? const SizedBox(
+                            width: 18,
+                            height: 18,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          )
+                        : const Icon(Icons.mail_outline),
+                    label: Text(
+                      'Send magic link',
+                      style: GoogleFonts.epilogue(
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    onPressed:
+                        isLoading ? null : () => _sendLink(dialogSetState),
+                    style: FilledButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      textStyle: GoogleFonts.epilogue(fontSize: 16),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
                   ),
                 ),
-              ),
+                if (message != null) ...[
+                  const SizedBox(height: 12),
+                  Text(
+                    message!,
+                    style: GoogleFonts.inter(
+                      color: Colors.green,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ],
+              ],
             ),
-            if (message != null) ...[
-              const SizedBox(height: 12),
-              Text(
-                message!,
-                style: GoogleFonts.inter(
-                  color: Colors.green,
-                  fontSize: 14,
-                  fontWeight: FontWeight.w600,
-                ),
-                textAlign: TextAlign.center,
-              ),
-            ],
-          ],
-        ),
-      ),
+          ),
+        );
+      },
     ),
   );
 }
