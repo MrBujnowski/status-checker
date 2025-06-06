@@ -175,7 +175,8 @@ class AboutWidget extends StatelessWidget {
           ),
         ),
       ),
-    );
+    ),
+  );
   }
 }
 
