@@ -13,7 +13,7 @@ class AboutWidget extends StatelessWidget {
           const Text('•', style: TextStyle(fontSize: 18)),
           const SizedBox(width: 6),
           Expanded(
-            child: Text(
+            child: SelectableText(
               text,
               style: GoogleFonts.inter(
                 fontSize: 16,
@@ -30,7 +30,7 @@ class AboutWidget extends StatelessWidget {
   Widget _paragraph(BuildContext context, String text) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 16),
-      child: Text(
+      child: SelectableText(
         text,
         style: GoogleFonts.inter(
           fontSize: 16,
@@ -48,7 +48,7 @@ class AboutWidget extends StatelessWidget {
         alignment: Alignment.center,
         child: Semantics(
           header: true,
-          child: Text(
+          child: SelectableText(
             text,
             textAlign: TextAlign.center,
             style: GoogleFonts.epilogue(
@@ -71,7 +71,7 @@ class AboutWidget extends StatelessWidget {
       child: ExpansionTile(
         tilePadding: EdgeInsets.zero,
         childrenPadding: const EdgeInsets.only(left: 8, bottom: 8),
-        title: Text(
+        title: SelectableText(
           question,
           style: GoogleFonts.inter(
             fontSize: 16,
@@ -82,7 +82,7 @@ class AboutWidget extends StatelessWidget {
         children: [
           Align(
             alignment: Alignment.centerLeft,
-            child: Text(
+            child: SelectableText(
               answer,
               style: GoogleFonts.inter(
                 fontSize: 16,
@@ -104,9 +104,10 @@ class AboutWidget extends StatelessWidget {
         constraints: const BoxConstraints(maxWidth: 750),
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
+          child: SelectionArea(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
               _header('About Narrativva Status Checker'),
               _paragraph(
                 context,
