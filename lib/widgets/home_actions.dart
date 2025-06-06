@@ -100,13 +100,16 @@ class HomeActions extends StatelessWidget {
                       borderRadius: BorderRadius.circular(12),
                     ),
                   ),
-                  onPressed: () {
+                  onPressed: () async {
                     if (urlController.text.trim().isNotEmpty) {
-                      onAddUrl(
+                      await onAddUrl(
                         urlController.text.trim(),
                         nameController.text.trim().isEmpty ? null : nameController.text.trim(),
                       );
-                      Navigator.of(context).pop();
+                      ScaffoldMessenger.of(dialogContext).showSnackBar(
+                        const SnackBar(content: Text('Page added.')),
+                      );
+                      Navigator.of(dialogContext).pop();
                     }
                   },
                   child: const Text('Add'),
@@ -188,12 +191,13 @@ class HomeActions extends StatelessWidget {
                   onPressed: () async {
                     final url = webhookController.text.trim();
                     if (url.isNotEmpty && url != currentWebhook) {
-                      Navigator.of(context).pop();
-                      // Tady případně otevři dialog pro ověření webhooku, nebo rovnou voláš onUpdateUserSettings:
                       await onUpdateUserSettings(discordWebhookUrl: url);
-                      // případně zobraz snackbar atd.
+                      ScaffoldMessenger.of(dialogContext).showSnackBar(
+                        const SnackBar(content: Text('Webhook saved')),
+                      );
+                      Navigator.of(dialogContext).pop();
                     } else {
-                      Navigator.of(context).pop();
+                      Navigator.of(dialogContext).pop();
                     }
                   },
                   child: const Text('Verify & Save'),
