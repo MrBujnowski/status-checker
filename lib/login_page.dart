@@ -149,30 +149,36 @@ void _showLoginDialog() {
         child: SafeArea(
           child: Padding(
             padding: const EdgeInsets.only(top: 6, right: 10),
-            child: Row(
-              children: [
-                const Spacer(),
-                TimezoneSwitchWidget(
-                  selectedTimezone: timezone,
-                  onChanged: (tz) => setState(() => timezone = tz),
-                ),
-                const SizedBox(width: 10),
-                IconButton(
-                  icon: Icon(
-                    widget.themeMode == ThemeMode.dark
-                        ? Icons.light_mode
-                        : Icons.dark_mode,
-                    size: 25,
-                  ),
-                  onPressed: widget.onToggleTheme,
-                  tooltip: 'Switch light/dark theme',
-                ),
-                IconButton(
-                  icon: const Icon(Icons.login),
-                  onPressed: _showLoginDialog,
-                  tooltip: 'Login',
-                ),
-              ],
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                final showLoginButton = constraints.maxWidth > 450;
+                return Row(
+                  children: [
+                    const Spacer(),
+                    TimezoneSwitchWidget(
+                      selectedTimezone: timezone,
+                      onChanged: (tz) => setState(() => timezone = tz),
+                    ),
+                    const SizedBox(width: 10),
+                    IconButton(
+                      icon: Icon(
+                        widget.themeMode == ThemeMode.dark
+                            ? Icons.light_mode
+                            : Icons.dark_mode,
+                        size: 25,
+                      ),
+                      onPressed: widget.onToggleTheme,
+                      tooltip: 'Switch light/dark theme',
+                    ),
+                    if (showLoginButton)
+                      IconButton(
+                        icon: const Icon(Icons.login),
+                        onPressed: _showLoginDialog,
+                        tooltip: 'Login',
+                      ),
+                  ],
+                );
+              },
             ),
           ),
         ),
