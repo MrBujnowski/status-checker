@@ -44,15 +44,55 @@ class AboutWidget extends StatelessWidget {
   Widget _header(String text, {double size = 32}) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 14, top: 24),
-      child: Semantics(
-        header: true,
-        child: Text(
-          text,
-          style: GoogleFonts.epilogue(
-            fontSize: size,
-            fontWeight: FontWeight.w700,
+      child: Align(
+        alignment: Alignment.center,
+        child: Semantics(
+          header: true,
+          child: Text(
+            text,
+            textAlign: TextAlign.center,
+            style: GoogleFonts.epilogue(
+              fontSize: size,
+              fontWeight: FontWeight.w700,
+            ),
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _faqItem(
+    BuildContext context, {
+    required String question,
+    required String answer,
+  }) {
+    return Theme(
+      data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
+      child: ExpansionTile(
+        tilePadding: EdgeInsets.zero,
+        childrenPadding: const EdgeInsets.only(left: 8, bottom: 8),
+        title: Text(
+          question,
+          style: GoogleFonts.inter(
+            fontSize: 16,
+            fontWeight: FontWeight.w600,
+            color: Theme.of(context).colorScheme.onSurface,
+          ),
+        ),
+        children: [
+          Align(
+            alignment: Alignment.centerLeft,
+            child: Text(
+              answer,
+              style: GoogleFonts.inter(
+                fontSize: 16,
+                height: 1.5,
+                color:
+                    Theme.of(context).colorScheme.onSurface.withOpacity(0.8),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -101,14 +141,26 @@ class AboutWidget extends StatelessWidget {
               _buildBullet(context, 'Set up Discord notifications for real-time incident alerts.'),
               _buildBullet(context, 'Completely free—no signups or credit cards required.'),
               _header('FAQ', size: 26),
-              _paragraph(context, 'Is Narrativva Status Checker free?'),
-              _paragraph(context, 'Yes, it\'s 100% free to use.'),
-              _paragraph(context, 'How often does it check my websites?'),
-              _paragraph(context, 'Checks are performed automatically every 15 minutes.'),
-              _paragraph(context, 'How many projects can I add?'),
-              _paragraph(context, 'Each user can monitor up to 10 projects at once.'),
-              _paragraph(context, 'Where can I find more Narrativva Labs tools?'),
-              _paragraph(context, 'Visit labs.narrativva.com for the latest projects.'),
+              _faqItem(
+                context,
+                question: 'Is Narrativva Status Checker free?',
+                answer: "Yes, it's 100% free to use.",
+              ),
+              _faqItem(
+                context,
+                question: 'How often does it check my websites?',
+                answer: 'Checks are performed automatically every 15 minutes.',
+              ),
+              _faqItem(
+                context,
+                question: 'How many projects can I add?',
+                answer: 'Each user can monitor up to 10 projects at once.',
+              ),
+              _faqItem(
+                context,
+                question: 'Where can I find more Narrativva Labs tools?',
+                answer: 'Visit labs.narrativva.com for the latest projects.',
+              ),
               _paragraph(
                 context,
                 'Narrativva Status Checker is our core monitoring solution for all Narrativva and Narrativva Labs systems, now open to anyone who wants to keep their sites online, available, and secure.',
