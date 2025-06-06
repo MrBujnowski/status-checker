@@ -21,39 +21,46 @@ class AppFooter extends StatelessWidget {
 
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 20),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          const Divider(),
-          const SizedBox(height: 24),
-          Center(
-            child: Wrap(
-              alignment: WrapAlignment.center,
-              crossAxisAlignment: WrapCrossAlignment.center,
-              spacing: 20,
-              runSpacing: 8,
-              children: [
-                TextButton.icon(
-                  onPressed: () => _openUrl('https://github.com/Narrativva-Labs/status-checker'),
-                  icon: const Icon(Icons.star_border, size: 18),
-                  label: Text('Star us on GitHub', style: textStyle),
-                ),
-                TextButton(
-                  onPressed: () => _openUrl('https://status.narrativva.com/about'),
-                  child: Text('About', style: textStyle),
-                ),
-                TextButton(
-                  onPressed: () => _openUrl('https://labs.narrativva.com'),
-                  child: Text('Built by Narrativva Labs', style: textStyle),
-                ),
-                TextButton(
-                  onPressed: () => _openUrl('https://narrativva.com'),
-                  child: Text('\u00a9 2025 Narrativva', style: textStyle),
-                ),
-              ],
-            ),
+      child: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 700),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Divider(
+                height: 44,
+                thickness: 1,
+                color: Colors.grey.withOpacity(0.14),
+              ),
+              const SizedBox(height: 24),
+              Wrap(
+                alignment: WrapAlignment.center,
+                crossAxisAlignment: WrapCrossAlignment.center,
+                spacing: 20,
+                runSpacing: 8,
+                children: [
+                  TextButton.icon(
+                    onPressed: () => _openUrl('https://github.com/Narrativva-Labs/status-checker'),
+                    icon: const Icon(Icons.star_border, size: 18),
+                    label: Text('Star us on GitHub', style: textStyle),
+                  ),
+                  TextButton(
+                    onPressed: () => _openUrl('https://status.narrativva.com/about'),
+                    child: Text('About', style: textStyle),
+                  ),
+                  TextButton(
+                    onPressed: () => _openUrl('https://labs.narrativva.com'),
+                    child: Text('Built by Narrativva Labs', style: textStyle),
+                  ),
+                  TextButton(
+                    onPressed: () => _openUrl('https://narrativva.com'),
+                    child: Text('\u00a9 2025 Narrativva', style: textStyle),
+                  ),
+                ],
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }
