@@ -70,16 +70,50 @@ class PageStatusRowWidget extends StatelessWidget {
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 14),
-              SizedBox(
-                height: 30,
-                child: ListView(
-                  scrollDirection: Axis.horizontal,
-                  shrinkWrap: true,
-                  children: [
-                    for (final tuple in ovals)
-                      _StatusOval(status: tuple.$1, day: tuple.$2),
-                  ],
-                ),
+              LayoutBuilder(
+                builder: (context, constraints) {
+                  final isNarrow = constraints.maxWidth < 400;
+                  final ovalWidth = isNarrow ? 4.0 : 15.0;
+                  final ovalHeight = isNarrow ? 20.0 : 28.0;
+
+                  Widget row = SizedBox(
+                    height: ovalHeight,
+                    child: ListView(
+                      scrollDirection: Axis.horizontal,
+                      shrinkWrap: true,
+                      children: [
+                        for (final tuple in ovals)
+                          _StatusOval(
+                            status: tuple.$1,
+                            day: tuple.$2,
+                            width: ovalWidth,
+                            height: ovalHeight,
+                          ),
+                      ],
+                    ),
+                  );
+
+                  if (isNarrow) {
+                    return Column(
+                      children: [
+                        row,
+                        const SizedBox(height: 4),
+                        Text(
+                          'Last 30 days',
+                          style: GoogleFonts.inter(
+                            fontSize: 12,
+                            color: Theme.of(context)
+                                .colorScheme
+                                .onSurface
+                                .withOpacity(0.6),
+                          ),
+                        ),
+                      ],
+                    );
+                  }
+
+                  return row;
+                },
               ),
             ],
           ),
@@ -92,7 +126,14 @@ class PageStatusRowWidget extends StatelessWidget {
 class _StatusOval extends StatefulWidget {
   final String status;
   final String day;
-  const _StatusOval({required this.status, required this.day});
+  final double width;
+  final double height;
+  const _StatusOval({
+    required this.status,
+    required this.day,
+    this.width = 15,
+    this.height = 28,
+  });
 
   @override
   State<_StatusOval> createState() => _StatusOvalState();
@@ -160,8 +201,8 @@ class _StatusOvalState extends State<_StatusOval> {
           child: AnimatedContainer(
             duration: const Duration(milliseconds: 120),
             margin: const EdgeInsets.symmetric(horizontal: 1.3),
-            width: 15,
-            height: 28,
+            width: widget.width,
+            height: widget.height,
             decoration: BoxDecoration(
               color: color,
               borderRadius: BorderRadius.circular(8),
