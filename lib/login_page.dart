@@ -6,6 +6,7 @@ import 'models/url_entry.dart';
 import 'widgets/timezone_switch.dart';
 import 'widgets/page_status_row.dart';
 import 'widgets/online_dot.dart';
+import 'widgets/app_footer.dart';
 
 class LoginPage extends StatefulWidget {
   final void Function() onToggleTheme;
@@ -268,6 +269,7 @@ void _showLoginDialog() {
                 },
               ),
               const SizedBox(height: 48),
+              const AppFooter(),
             ],
           );
         },

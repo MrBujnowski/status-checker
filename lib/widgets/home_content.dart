@@ -4,6 +4,7 @@ import '../models/user_settings.dart';
 import 'home_actions.dart';
 import 'home_user_pages.dart';
 import 'home_public_pages.dart';
+import 'app_footer.dart';
 
 class HomeContent extends StatefulWidget {
   final bool isLoggedIn;
@@ -74,6 +75,7 @@ class _HomeContentState extends State<HomeContent> {
                 ),
               ),
               const SizedBox(height: 60),
+              const AppFooter(),
             ],
           );
         },
