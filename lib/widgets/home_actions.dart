@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import '../services/discord_service.dart';
 
 class HomeActions extends StatelessWidget {
   final bool isLoggedIn;
@@ -127,6 +128,7 @@ class HomeActions extends StatelessWidget {
     String? currentWebhook = await onLoadDiscordWebhookUrl();
     currentWebhook ??= "";
     final webhookController = TextEditingController(text: currentWebhook);
+    final discordService = DiscordService();
 
     showDialog(
       context: context,
@@ -191,11 +193,52 @@ class HomeActions extends StatelessWidget {
                   onPressed: () async {
                     final url = webhookController.text.trim();
                     if (url.isNotEmpty && url != currentWebhook) {
-                      await onUpdateUserSettings(discordWebhookUrl: url);
-                      ScaffoldMessenger.of(dialogContext).showSnackBar(
-                        const SnackBar(content: Text('Webhook saved')),
+                      final sent = await discordService.sendVerificationCode(url);
+                      if (!sent) {
+                        ScaffoldMessenger.of(dialogContext).showSnackBar(
+                          const SnackBar(content: Text('Failed to send verification code')),
+                        );
+                        return;
+                      }
+
+                      final codeController = TextEditingController();
+                      final verified = await showDialog<bool>(
+                        context: dialogContext,
+                        builder: (verifyContext) => AlertDialog(
+                          title: const Text('Enter Verification Code'),
+                          content: TextField(
+                            controller: codeController,
+                            keyboardType: TextInputType.number,
+                            decoration: const InputDecoration(labelText: 'Code'),
+                          ),
+                          actions: [
+                            TextButton(
+                              onPressed: () => Navigator.of(verifyContext).pop(false),
+                              child: const Text('Cancel'),
+                            ),
+                            TextButton(
+                              onPressed: () {
+                                if (discordService.verifyCode(codeController.text.trim())) {
+                                  Navigator.of(verifyContext).pop(true);
+                                } else {
+                                  ScaffoldMessenger.of(verifyContext).showSnackBar(
+                                    const SnackBar(content: Text('Invalid code')),
+                                  );
+                                }
+                              },
+                              child: const Text('Verify'),
+                            ),
+                          ],
+                        ),
                       );
-                      Navigator.of(dialogContext).pop();
+
+                      if (verified == true) {
+                        await onUpdateUserSettings(discordWebhookUrl: url);
+                        ScaffoldMessenger.of(dialogContext).showSnackBar(
+                          const SnackBar(content: Text('Webhook saved')),
+                        );
+                        Navigator.of(dialogContext).pop();
+                      }
                     } else {
                       Navigator.of(dialogContext).pop();
                     }
