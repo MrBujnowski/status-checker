@@ -199,7 +199,7 @@ void _showLoginDialog() {
                       mainAxisAlignment: MainAxisAlignment.center,
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
-                        Text(
+                        SelectableText(
                           'Narrativva Status',
                           style: GoogleFonts.epilogue(
                             fontWeight: FontWeight.w800,
@@ -213,7 +213,7 @@ void _showLoginDialog() {
                       ],
                     ),
                     const SizedBox(height: 18),
-                    Text(
+                    SelectableText(
                       'Live status and uptime monitoring for all Narrativva apps and websites.',
                       style: GoogleFonts.inter(
                         fontSize: 18,

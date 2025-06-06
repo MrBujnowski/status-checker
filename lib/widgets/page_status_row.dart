@@ -51,7 +51,7 @@ class PageStatusRowWidget extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              Text(
+              SelectableText(
                 page.urlName?.isNotEmpty == true ? page.urlName! : page.url,
                 style: GoogleFonts.epilogue(
                   fontWeight: FontWeight.w700,
@@ -61,7 +61,7 @@ class PageStatusRowWidget extends StatelessWidget {
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 2),
-              Text(
+              SelectableText(
                 page.url,
                 style: GoogleFonts.inter(
                   fontSize: 12,
