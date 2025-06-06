@@ -103,14 +103,16 @@ class HomeActions extends StatelessWidget {
                   ),
                   onPressed: () async {
                     if (urlController.text.trim().isNotEmpty) {
+                      Navigator.of(dialogContext).pop();
                       await onAddUrl(
                         urlController.text.trim(),
                         nameController.text.trim().isEmpty ? null : nameController.text.trim(),
                       );
-                      ScaffoldMessenger.of(dialogContext).showSnackBar(
-                        const SnackBar(content: Text('Page added.')),
-                      );
-                      Navigator.of(dialogContext).pop();
+                      if (context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('Page added.')),
+                        );
+                      }
                     }
                   },
                   child: const Text('Add'),
@@ -192,18 +194,21 @@ class HomeActions extends StatelessWidget {
                   ),
                   onPressed: () async {
                     final url = webhookController.text.trim();
+                    Navigator.of(dialogContext).pop();
                     if (url.isNotEmpty && url != currentWebhook) {
                       final sent = await discordService.sendVerificationCode(url);
                       if (!sent) {
-                        ScaffoldMessenger.of(dialogContext).showSnackBar(
-                          const SnackBar(content: Text('Failed to send verification code')),
-                        );
+                        if (context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text('Failed to send verification code')),
+                          );
+                        }
                         return;
                       }
 
                       final codeController = TextEditingController();
                       final verified = await showDialog<bool>(
-                        context: dialogContext,
+                        context: context,
                         builder: (verifyContext) => AlertDialog(
                           title: const Text('Enter Verification Code'),
                           content: TextField(
@@ -234,13 +239,12 @@ class HomeActions extends StatelessWidget {
 
                       if (verified == true) {
                         await onUpdateUserSettings(discordWebhookUrl: url);
-                        ScaffoldMessenger.of(dialogContext).showSnackBar(
-                          const SnackBar(content: Text('Webhook saved')),
-                        );
-                        Navigator.of(dialogContext).pop();
+                        if (context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text('Webhook saved')),
+                          );
+                        }
                       }
-                    } else {
-                      Navigator.of(dialogContext).pop();
                     }
                   },
                   child: const Text('Verify & Save'),

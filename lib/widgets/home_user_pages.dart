@@ -104,15 +104,17 @@ Future<void> _showEditDialog(BuildContext context, UrlEntry entry) async {
                 ),
                 onPressed: () async {
                   if (editUrlController.text.trim().isEmpty) return;
+                  Navigator.of(dialogContext).pop();
                   await onEditUrl(
                     entry.id,
                     editUrlController.text.trim(),
                     editUrlNameController.text.trim().isEmpty ? null : editUrlNameController.text.trim(),
                   );
-                  ScaffoldMessenger.of(dialogContext).showSnackBar(
-                    const SnackBar(content: Text('Page updated.')),
-                  );
-                  Navigator.of(dialogContext).pop();
+                  if (context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Page updated.')),
+                    );
+                  }
                 },
                 child: const Text('Save'),
               ),
@@ -188,11 +190,13 @@ Future<void> _showDeleteConfirmDialog(BuildContext context, String pageId) async
                   ),
                 ),
                 onPressed: () async {
-                  await onDeleteUrl(pageId);
-                  ScaffoldMessenger.of(dialogContext).showSnackBar(
-                    const SnackBar(content: Text('Page deleted.')),
-                  );
                   Navigator.of(dialogContext).pop();
+                  await onDeleteUrl(pageId);
+                  if (context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Page deleted.')),
+                    );
+                  }
                 },
                 child: const Text('Delete'),
               ),
