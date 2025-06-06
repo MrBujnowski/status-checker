@@ -51,6 +51,19 @@
       color: #ffffff;
       text-align: center;
     }
+    .faq details {
+      background-color: #2c2c2c;
+      border-radius: 4px;
+      margin-bottom: 8px;
+      padding: 10px 15px;
+    }
+    .faq summary {
+      cursor: pointer;
+      font-weight: 600;
+    }
+    .faq details[open] {
+      background-color: #333;
+    }
   </style>
 </head>
 <body>
@@ -90,16 +103,43 @@
   </ul>
 
   <h2>FAQ</h2>
-  <p><strong>Is Narrativva Status Checker free?</strong> Yes, it’s 100% free to use.</p>
-  <p><strong>How often does it check my websites?</strong> Checks are performed automatically every 15 minutes.</p>
-  <p><strong>How many projects can I add?</strong> Each user can monitor up to 10 projects at once.</p>
-  <p><strong>Where can I find more Narrativva Labs tools?</strong> Visit <a href="https://labs.narrativva.com" target="_blank" rel="noopener noreferrer">labs.narrativva.com</a> for the latest projects.</p>
+  <div class="faq">
+    <details>
+      <summary>Is Narrativva Status Checker free?</summary>
+      <p>Yes, it’s 100% free to use.</p>
+    </details>
+    <details>
+      <summary>How often does it check my websites?</summary>
+      <p>Checks are performed automatically every 15 minutes.</p>
+    </details>
+    <details>
+      <summary>How many projects can I add?</summary>
+      <p>Each user can monitor up to 10 projects at once.</p>
+    </details>
+    <details>
+      <summary>Where can I find more Narrativva Labs tools?</summary>
+      <p>Visit <a href="https://labs.narrativva.com" target="_blank" rel="noopener noreferrer">labs.narrativva.com</a> for the latest projects.</p>
+    </details>
+  </div>
 
   <p>Narrativva Status Checker is our core monitoring solution for all Narrativva and Narrativva Labs systems, now open to anyone who wants to keep their sites online, available, and secure.</p>
 
   <p>Return to the <a href="https://status.narrativva.com" target="_blank" rel="noopener noreferrer">main dashboard</a>.</p>
   <p>Explore more at <a href="https://narrativva.com" target="_blank" rel="noopener noreferrer">narrativva.com</a> or <a href="https://labs.narrativva.com" target="_blank" rel="noopener noreferrer">labs.narrativva.com</a>.</p>
   <p>Contact us at <a href="mailto:info@narrativva.com">info@narrativva.com</a>.</p>
-</main>
+  </main>
+  <script>
+    document.querySelectorAll('.faq details').forEach((detail) => {
+      detail.addEventListener('toggle', () => {
+        if (detail.open) {
+          document.querySelectorAll('.faq details').forEach((el) => {
+            if (el !== detail) {
+              el.removeAttribute('open');
+            }
+          });
+        }
+      });
+    });
+  </script>
 </body>
 </html>
