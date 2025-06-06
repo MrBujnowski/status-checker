@@ -73,29 +73,11 @@ class PageStatusRowWidget extends StatelessWidget {
               LayoutBuilder(
                 builder: (context, constraints) {
                   final isNarrow = constraints.maxWidth < 400;
-                  final ovalWidth = isNarrow ? 10.0 : 15.0;
+                  final ovalWidth = isNarrow ? 4.0 : 15.0;
                   final ovalHeight = isNarrow ? 20.0 : 28.0;
-                  if (isNarrow) {
-                    return SizedBox(
-                      height: ovalHeight * 2 + 4,
-                      child: Wrap(
-                        alignment: WrapAlignment.center,
-                        spacing: 0,
-                        runSpacing: 4,
-                        children: [
-                          for (final tuple in ovals)
-                            _StatusOval(
-                              status: tuple.$1,
-                              day: tuple.$2,
-                              width: ovalWidth,
-                              height: ovalHeight,
-                            ),
-                        ],
-                      ),
-                    );
-                  }
-                  return SizedBox(
-                    height: 30,
+
+                  Widget row = SizedBox(
+                    height: ovalHeight,
                     child: ListView(
                       scrollDirection: Axis.horizontal,
                       shrinkWrap: true,
@@ -110,6 +92,27 @@ class PageStatusRowWidget extends StatelessWidget {
                       ],
                     ),
                   );
+
+                  if (isNarrow) {
+                    return Column(
+                      children: [
+                        row,
+                        const SizedBox(height: 4),
+                        Text(
+                          'Last 30 days',
+                          style: GoogleFonts.inter(
+                            fontSize: 12,
+                            color: Theme.of(context)
+                                .colorScheme
+                                .onSurface
+                                .withOpacity(0.6),
+                          ),
+                        ),
+                      ],
+                    );
+                  }
+
+                  return row;
                 },
               ),
             ],
