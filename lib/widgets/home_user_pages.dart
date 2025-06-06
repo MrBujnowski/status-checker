@@ -24,7 +24,7 @@ Future<void> _showEditDialog(BuildContext context, UrlEntry entry) async {
   await showDialog<void>(
     context: context,
     barrierDismissible: false,
-    builder: (context) => AlertDialog(
+    builder: (dialogContext) => AlertDialog(
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(18),
         side: BorderSide(
@@ -102,15 +102,17 @@ Future<void> _showEditDialog(BuildContext context, UrlEntry entry) async {
                     borderRadius: BorderRadius.circular(12),
                   ),
                 ),
-                onPressed: () {
+                onPressed: () async {
                   if (editUrlController.text.trim().isEmpty) return;
-                  Navigator.of(context).pop();
-                  // Callback na edit:
-                  onEditUrl(
+                  await onEditUrl(
                     entry.id,
                     editUrlController.text.trim(),
                     editUrlNameController.text.trim().isEmpty ? null : editUrlNameController.text.trim(),
                   );
+                  ScaffoldMessenger.of(dialogContext).showSnackBar(
+                    const SnackBar(content: Text('Page updated.')),
+                  );
+                  Navigator.of(dialogContext).pop();
                 },
                 child: const Text('Save'),
               ),
@@ -123,9 +125,9 @@ Future<void> _showEditDialog(BuildContext context, UrlEntry entry) async {
 }
 
 Future<void> _showDeleteConfirmDialog(BuildContext context, String pageId) async {
-  final confirmed = await showDialog<bool>(
+  await showDialog<void>(
     context: context,
-    builder: (context) => AlertDialog(
+    builder: (dialogContext) => AlertDialog(
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(18),
         side: BorderSide(
@@ -185,7 +187,13 @@ Future<void> _showDeleteConfirmDialog(BuildContext context, String pageId) async
                     borderRadius: BorderRadius.circular(12),
                   ),
                 ),
-                onPressed: () => Navigator.of(context).pop(true),
+                onPressed: () async {
+                  await onDeleteUrl(pageId);
+                  ScaffoldMessenger.of(dialogContext).showSnackBar(
+                    const SnackBar(content: Text('Page deleted.')),
+                  );
+                  Navigator.of(dialogContext).pop();
+                },
                 child: const Text('Delete'),
               ),
             ),
@@ -194,10 +202,6 @@ Future<void> _showDeleteConfirmDialog(BuildContext context, String pageId) async
       ],
     ),
   );
-
-  if (confirmed == true) {
-    onDeleteUrl(pageId);
-  }
 }
 
   @override

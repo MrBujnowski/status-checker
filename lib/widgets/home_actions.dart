@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import '../services/discord_service.dart';
 
 class HomeActions extends StatelessWidget {
   final bool isLoggedIn;
@@ -100,13 +101,16 @@ class HomeActions extends StatelessWidget {
                       borderRadius: BorderRadius.circular(12),
                     ),
                   ),
-                  onPressed: () {
+                  onPressed: () async {
                     if (urlController.text.trim().isNotEmpty) {
-                      onAddUrl(
+                      await onAddUrl(
                         urlController.text.trim(),
                         nameController.text.trim().isEmpty ? null : nameController.text.trim(),
                       );
-                      Navigator.of(context).pop();
+                      ScaffoldMessenger.of(dialogContext).showSnackBar(
+                        const SnackBar(content: Text('Page added.')),
+                      );
+                      Navigator.of(dialogContext).pop();
                     }
                   },
                   child: const Text('Add'),
@@ -124,6 +128,7 @@ class HomeActions extends StatelessWidget {
     String? currentWebhook = await onLoadDiscordWebhookUrl();
     currentWebhook ??= "";
     final webhookController = TextEditingController(text: currentWebhook);
+    final discordService = DiscordService();
 
     showDialog(
       context: context,
@@ -188,12 +193,54 @@ class HomeActions extends StatelessWidget {
                   onPressed: () async {
                     final url = webhookController.text.trim();
                     if (url.isNotEmpty && url != currentWebhook) {
-                      Navigator.of(context).pop();
-                      // Tady případně otevři dialog pro ověření webhooku, nebo rovnou voláš onUpdateUserSettings:
-                      await onUpdateUserSettings(discordWebhookUrl: url);
-                      // případně zobraz snackbar atd.
+                      final sent = await discordService.sendVerificationCode(url);
+                      if (!sent) {
+                        ScaffoldMessenger.of(dialogContext).showSnackBar(
+                          const SnackBar(content: Text('Failed to send verification code')),
+                        );
+                        return;
+                      }
+
+                      final codeController = TextEditingController();
+                      final verified = await showDialog<bool>(
+                        context: dialogContext,
+                        builder: (verifyContext) => AlertDialog(
+                          title: const Text('Enter Verification Code'),
+                          content: TextField(
+                            controller: codeController,
+                            keyboardType: TextInputType.number,
+                            decoration: const InputDecoration(labelText: 'Code'),
+                          ),
+                          actions: [
+                            TextButton(
+                              onPressed: () => Navigator.of(verifyContext).pop(false),
+                              child: const Text('Cancel'),
+                            ),
+                            TextButton(
+                              onPressed: () {
+                                if (discordService.verifyCode(codeController.text.trim())) {
+                                  Navigator.of(verifyContext).pop(true);
+                                } else {
+                                  ScaffoldMessenger.of(verifyContext).showSnackBar(
+                                    const SnackBar(content: Text('Invalid code')),
+                                  );
+                                }
+                              },
+                              child: const Text('Verify'),
+                            ),
+                          ],
+                        ),
+                      );
+
+                      if (verified == true) {
+                        await onUpdateUserSettings(discordWebhookUrl: url);
+                        ScaffoldMessenger.of(dialogContext).showSnackBar(
+                          const SnackBar(content: Text('Webhook saved')),
+                        );
+                        Navigator.of(dialogContext).pop();
+                      }
                     } else {
-                      Navigator.of(context).pop();
+                      Navigator.of(dialogContext).pop();
                     }
                   },
                   child: const Text('Verify & Save'),
