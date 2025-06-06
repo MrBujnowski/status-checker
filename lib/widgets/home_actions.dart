@@ -127,8 +127,8 @@ class HomeActions extends StatelessWidget {
 
   // ======= DISCORD WEBHOOK DIALOG + VERIFICATION =======
   void _showDiscordWebhookDialog(BuildContext context) async {
-    String? currentWebhook = await onLoadDiscordWebhookUrl();
-    currentWebhook ??= "";
+    final String currentWebhook =
+        (await onLoadDiscordWebhookUrl()) ?? "";
     final webhookController = TextEditingController(text: currentWebhook);
     final discordService = DiscordService();
 
