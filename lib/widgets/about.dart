@@ -7,22 +7,26 @@ class AboutWidget extends StatelessWidget {
   Widget _buildBullet(BuildContext context, String text) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 6),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text('•', style: TextStyle(fontSize: 18)),
-          const SizedBox(width: 6),
-          Expanded(
-            child: SelectableText(
-              text,
+      child: SelectableText.rich(
+        TextSpan(
+          children: [
+            TextSpan(
+              text: '\u2022 ',
+              style: const TextStyle(fontSize: 18),
+            ),
+            TextSpan(
+              text: text,
               style: GoogleFonts.inter(
                 fontSize: 16,
                 height: 1.4,
-                color: Theme.of(context).colorScheme.onSurface.withOpacity(0.8),
+                color: Theme.of(context)
+                    .colorScheme
+                    .onSurface
+                    .withOpacity(0.8),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -162,6 +166,7 @@ class AboutWidget extends StatelessWidget {
                 question: 'Where can I find more Narrativva Labs tools?',
                 answer: 'Visit labs.narrativva.com for the latest projects.',
               ),
+              const SizedBox(height: 16),
               _paragraph(
                 context,
                 'Narrativva Status Checker is our core monitoring solution for all Narrativva and Narrativva Labs systems, now open to anyone who wants to keep their sites online, available, and secure.',
