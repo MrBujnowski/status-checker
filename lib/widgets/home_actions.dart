@@ -291,7 +291,7 @@ class HomeActions extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            Text(
+            SelectableText(
               "Narrativva Status",
               style: GoogleFonts.epilogue(
                 fontSize: 40,
@@ -305,7 +305,7 @@ class HomeActions extends StatelessWidget {
           ],
         ),
         const SizedBox(height: 14),
-        Text(
+        SelectableText(
           "Live status and uptime monitoring for all Narrativva apps and websites.",
           style: GoogleFonts.inter(
             fontSize: 17,
