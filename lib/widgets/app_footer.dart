@@ -20,29 +20,40 @@ class AppFooter extends StatelessWidget {
     );
 
     return Padding(
-      padding: const EdgeInsets.only(top: 40, bottom: 20),
-      child: Center(
-        child: Wrap(
-          alignment: WrapAlignment.center,
-          crossAxisAlignment: WrapCrossAlignment.center,
-          spacing: 20,
-          runSpacing: 8,
-          children: [
-            TextButton.icon(
-              onPressed: () => _openUrl('https://github.com/Narrativva-Labs/status-checker'),
-              icon: const Icon(Icons.star_border, size: 18),
-              label: Text('Star us on GitHub', style: textStyle),
+      padding: const EdgeInsets.symmetric(vertical: 20),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Divider(),
+          const SizedBox(height: 24),
+          Center(
+            child: Wrap(
+              alignment: WrapAlignment.center,
+              crossAxisAlignment: WrapCrossAlignment.center,
+              spacing: 20,
+              runSpacing: 8,
+              children: [
+                TextButton.icon(
+                  onPressed: () => _openUrl('https://github.com/Narrativva-Labs/status-checker'),
+                  icon: const Icon(Icons.star_border, size: 18),
+                  label: Text('Star us on GitHub', style: textStyle),
+                ),
+                TextButton(
+                  onPressed: () => _openUrl('https://status.narrativva.com/about'),
+                  child: Text('About', style: textStyle),
+                ),
+                TextButton(
+                  onPressed: () => _openUrl('https://labs.narrativva.com'),
+                  child: Text('Built by Narrativva Labs', style: textStyle),
+                ),
+                TextButton(
+                  onPressed: () => _openUrl('https://narrativva.com'),
+                  child: Text('\u00a9 2025 Narrativva', style: textStyle),
+                ),
+              ],
             ),
-            TextButton(
-              onPressed: () => _openUrl('https://labs.narrativva.com'),
-              child: Text('Built by Narrativva Labs', style: textStyle),
-            ),
-            TextButton(
-              onPressed: () => _openUrl('https://narrativva.com'),
-              child: Text('\u00a9 2025 Narrativva', style: textStyle),
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

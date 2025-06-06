@@ -74,7 +74,6 @@ class _HomeContentState extends State<HomeContent> {
                   timezone: widget.timezone,
                 ),
               ),
-              const SizedBox(height: 60),
               const AppFooter(),
             ],
           );

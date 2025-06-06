@@ -268,7 +268,6 @@ void _showLoginDialog() {
                   );
                 },
               ),
-              const SizedBox(height: 48),
               const AppFooter(),
             ],
           );
