@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flex_color_scheme/flex_color_scheme.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'auth/auth_gate.dart';
 
 class StatusCheckerApp extends StatefulWidget {
@@ -13,12 +14,45 @@ class StatusCheckerApp extends StatefulWidget {
 class _StatusCheckerAppState extends State<StatusCheckerApp> {
   ThemeMode _themeMode = ThemeMode.system;
 
+  @override
+  void initState() {
+    super.initState();
+    _loadThemeMode();
+  }
+
+  Future<void> _loadThemeMode() async {
+    final prefs = await SharedPreferences.getInstance();
+    final stored = prefs.getString('themeMode');
+    if (stored != null) {
+      setState(() {
+        switch (stored) {
+          case 'light':
+            _themeMode = ThemeMode.light;
+            break;
+          case 'dark':
+            _themeMode = ThemeMode.dark;
+            break;
+          default:
+            _themeMode = ThemeMode.system;
+        }
+      });
+    }
+  }
+
   // Přepínání světlo/tma
-  void _toggleTheme() {
-    setState(() {
-      _themeMode =
+  void _toggleTheme() async {
+    final brightness = WidgetsBinding.instance.window.platformBrightness;
+    ThemeMode newMode;
+    if (_themeMode == ThemeMode.system) {
+      newMode =
+          brightness == Brightness.dark ? ThemeMode.light : ThemeMode.dark;
+    } else {
+      newMode =
           _themeMode == ThemeMode.dark ? ThemeMode.light : ThemeMode.dark;
-    });
+    }
+    setState(() => _themeMode = newMode);
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('themeMode', newMode.name);
   }
 
   @override
