@@ -127,8 +127,8 @@ class HomeActions extends StatelessWidget {
 
   // ======= DISCORD WEBHOOK DIALOG + VERIFICATION =======
   void _showDiscordWebhookDialog(BuildContext context) async {
-    String? currentWebhook = await onLoadDiscordWebhookUrl();
-    currentWebhook ??= "";
+    final String currentWebhook =
+        (await onLoadDiscordWebhookUrl()) ?? "";
     final webhookController = TextEditingController(text: currentWebhook);
     final discordService = DiscordService();
 
@@ -181,6 +181,32 @@ class HomeActions extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 18),
+              if (currentWebhook.isNotEmpty) ...[
+                Expanded(
+                  child: FilledButton(
+                    style: FilledButton.styleFrom(
+                      backgroundColor: Colors.red.shade400,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 18),
+                      textStyle: GoogleFonts.epilogue(fontSize: 16, fontWeight: FontWeight.w600),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    onPressed: () async {
+                      Navigator.of(dialogContext).pop();
+                      await onUpdateUserSettings(discordWebhookUrl: null);
+                      if (context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('Webhook deleted')),
+                        );
+                      }
+                    },
+                    child: const Text('Delete'),
+                  ),
+                ),
+                const SizedBox(width: 18),
+              ],
               Expanded(
                 child: FilledButton(
                   style: FilledButton.styleFrom(
